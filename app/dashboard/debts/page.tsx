@@ -8,8 +8,10 @@ import { Select, SelectItem } from "@heroui/select";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import { Progress } from "@heroui/progress";
 import { Chip } from "@heroui/chip";
-import { Account, Debt, Currency } from "@/types";
+import { Account, Currency } from "@/shared/types";
+import { Debt } from "@/features/debts";
 import { IconTrash } from "@tabler/icons-react";
+import { formatCurrency } from "@/shared/utils";
 
 export default function DebtsPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -23,7 +25,7 @@ export default function DebtsPage() {
   const [formData, setFormData] = useState({
     amount: 0,
     description: "",
-    currency: "USD" as Currency,
+    currency: "USD_ZELLE" as Currency,
     dueDate: "",
     creditor: "",
     accountId: "",
@@ -71,7 +73,7 @@ export default function DebtsPage() {
         setFormData({
           amount: 0,
           description: "",
-          currency: "USD",
+          currency: "USD_ZELLE",
           dueDate: "",
           creditor: "",
           accountId: "",
@@ -145,7 +147,9 @@ export default function DebtsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Deudas</h1>
-          <p className="text-zinc-400 text-sm">Gestiona tus deudas pendientes</p>
+          <p className="text-zinc-400 text-sm">
+            Gestiona tus deudas pendientes
+          </p>
         </div>
         <Button
           className="bg-amber-600 hover:bg-amber-700"
@@ -165,13 +169,17 @@ export default function DebtsPage() {
         <Card className="bg-gradient-to-br from-amber-900/50 to-amber-950 border border-amber-700/50">
           <CardBody className="p-4">
             <p className="text-amber-300 text-sm">Monto Pendiente</p>
-            <p className="text-2xl font-bold text-white">${totalPending.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-white">
+              ${totalPending.toFixed(2)}
+            </p>
           </CardBody>
         </Card>
         <Card className="bg-gradient-to-br from-emerald-900/50 to-emerald-950 border border-emerald-700/50">
           <CardBody className="p-4">
             <p className="text-emerald-300 text-sm">Total Pagado</p>
-            <p className="text-2xl font-bold text-white">${totalPaid.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-white">
+              ${totalPaid.toFixed(2)}
+            </p>
           </CardBody>
         </Card>
       </div>
@@ -182,12 +190,18 @@ export default function DebtsPage() {
             <CardHeader className="flex justify-between items-start pb-2">
               <div>
                 <p className="text-white font-medium">{debt.creditor}</p>
-                <p className="text-zinc-500 text-sm">{debt.description || "Sin descripcion"}</p>
+                <p className="text-zinc-500 text-sm">
+                  {debt.description || "Sin descripcion"}
+                </p>
               </div>
               <Chip
                 size="sm"
                 variant="flat"
-                className={debt.isPaid ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}
+                className={
+                  debt.isPaid
+                    ? "bg-emerald-500/20 text-emerald-400"
+                    : "bg-amber-500/20 text-amber-400"
+                }
               >
                 {debt.isPaid ? "Pagado" : "Pendiente"}
               </Chip>
@@ -196,9 +210,7 @@ export default function DebtsPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-zinc-400">Monto Total</span>
                 <span className="text-white font-semibold">
-                  {debt.currency === "USD" ? "$" : ""}
-                  {debt.amount.toFixed(2)}
-                  {debt.currency === "USDT" ? " USDT" : ""}
+                  {formatCurrency(debt.amount, debt.currency)}
                 </span>
               </div>
 
@@ -213,7 +225,9 @@ export default function DebtsPage() {
 
               <div className="flex justify-between text-xs text-zinc-500">
                 <span>Pagado: ${debt.paidAmount.toFixed(2)}</span>
-                <span>Restante: ${(debt.amount - debt.paidAmount).toFixed(2)}</span>
+                <span>
+                  Restante: ${(debt.amount - debt.paidAmount).toFixed(2)}
+                </span>
               </div>
 
               {debt.dueDate && (
@@ -255,7 +269,10 @@ export default function DebtsPage() {
         <Card className="bg-zinc-900 border border-zinc-800">
           <CardBody className="py-12 text-center">
             <p className="text-zinc-500 mb-4">No tienes deudas registradas</p>
-            <Button className="bg-amber-600 hover:bg-amber-700" onPress={() => setModalOpen(true)}>
+            <Button
+              className="bg-amber-600 hover:bg-amber-700"
+              onPress={() => setModalOpen(true)}
+            >
               Registrar Primera Deuda
             </Button>
           </CardBody>
@@ -278,7 +295,9 @@ export default function DebtsPage() {
               <Input
                 label="Acreedor (a quien le debo)"
                 value={formData.creditor}
-                onChange={(e) => setFormData({ ...formData, creditor: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, creditor: e.target.value })
+                }
                 isRequired
                 classNames={{
                   input: "bg-zinc-800",
@@ -293,7 +312,10 @@ export default function DebtsPage() {
                   step="0.01"
                   value={formData.amount.toString()}
                   onChange={(e) =>
-                    setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
+                    setFormData({
+                      ...formData,
+                      amount: parseFloat(e.target.value) || 0,
+                    })
                   }
                   isRequired
                   classNames={{
@@ -305,7 +327,10 @@ export default function DebtsPage() {
                   label="Moneda"
                   selectedKeys={[formData.currency]}
                   onChange={(e) =>
-                    setFormData({ ...formData, currency: e.target.value as Currency })
+                    setFormData({
+                      ...formData,
+                      currency: e.target.value as Currency,
+                    })
                   }
                   classNames={{ trigger: "bg-zinc-800 border-zinc-700" }}
                 >
@@ -317,7 +342,9 @@ export default function DebtsPage() {
               <Input
                 label="Descripcion"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 classNames={{
                   input: "bg-zinc-800",
                   inputWrapper: "bg-zinc-800 border-zinc-700",
@@ -327,7 +354,9 @@ export default function DebtsPage() {
               <Select
                 label="Cuenta"
                 selectedKeys={formData.accountId ? [formData.accountId] : []}
-                onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, accountId: e.target.value })
+                }
                 classNames={{ trigger: "bg-zinc-800 border-zinc-700" }}
               >
                 {accounts.map((a) => (
@@ -339,7 +368,9 @@ export default function DebtsPage() {
                 type="date"
                 label="Fecha de Vencimiento"
                 value={formData.dueDate}
-                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, dueDate: e.target.value })
+                }
                 classNames={{
                   input: "bg-zinc-800",
                   inputWrapper: "bg-zinc-800 border-zinc-700",
@@ -389,7 +420,9 @@ export default function DebtsPage() {
                 type="number"
                 step="0.01"
                 value={paymentAmount.toString()}
-                onChange={(e) => setPaymentAmount(parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  setPaymentAmount(parseFloat(e.target.value) || 0)
+                }
                 isRequired
                 classNames={{
                   input: "bg-zinc-800",
@@ -424,4 +457,3 @@ export default function DebtsPage() {
     </div>
   );
 }
-

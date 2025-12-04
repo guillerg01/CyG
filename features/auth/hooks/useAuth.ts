@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { User } from "@/types";
+import { User } from "@/shared/types";
 
 interface AuthState {
   user: User | null;

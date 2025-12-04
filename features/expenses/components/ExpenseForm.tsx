@@ -5,7 +5,8 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Switch } from "@heroui/switch";
-import { Category, Account, Currency, PaymentMethod, ExpenseType } from "@/types";
+import { Category, Account, Currency, PaymentMethod, ExpenseType } from "@/shared/types";
+import { ExpenseFormData } from "../types";
 
 interface ExpenseFormProps {
   accounts: Account[];
@@ -16,22 +17,12 @@ interface ExpenseFormProps {
   loading?: boolean;
 }
 
-export interface ExpenseFormData {
-  amount: number;
-  description: string;
-  currency: Currency;
-  paymentMethod: PaymentMethod;
-  expenseType: ExpenseType;
-  isShared: boolean;
-  plannedDate?: string;
-  accountId: string;
-  categoryId: string;
-  createdAt?: string;
-}
-
 const currencies: { key: Currency; label: string }[] = [
-  { key: "USD", label: "USD ($)" },
+  { key: "USD_ZELLE", label: "USD Zelle" },
+  { key: "USD_EFECTIVO", label: "USD Efectivo" },
   { key: "USDT", label: "USDT" },
+  { key: "CUP_EFECTIVO", label: "CUP Efectivo" },
+  { key: "CUP_TRANSFERENCIA", label: "CUP Transferencia" },
 ];
 
 const paymentMethods: { key: PaymentMethod; label: string }[] = [
@@ -55,7 +46,7 @@ export function ExpenseForm({
   const [formData, setFormData] = useState<ExpenseFormData>({
     amount: initialData?.amount || 0,
     description: initialData?.description || "",
-    currency: initialData?.currency || "USD",
+    currency: initialData?.currency || "USD_ZELLE",
     paymentMethod: initialData?.paymentMethod || "CASH",
     expenseType: initialData?.expenseType || "REALIZED",
     isShared: initialData?.isShared || false,

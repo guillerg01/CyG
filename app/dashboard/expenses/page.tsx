@@ -15,9 +15,10 @@ import {
   TableCell,
 } from "@heroui/table";
 import { Chip } from "@heroui/chip";
-import { ExpenseForm, ExpenseFormData } from "@/components/forms/ExpenseForm";
-import { Account, Category, Expense, PaymentMethod, ExpenseType } from "@/types";
+import { ExpenseForm, ExpenseFormData, Expense, useExpenses } from "@/features/expenses";
+import { Account, Category, PaymentMethod, ExpenseType } from "@/shared/types";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { formatCurrency } from "@/shared/utils";
 
 export default function ExpensesPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -122,10 +123,21 @@ export default function ExpensesPage() {
   };
 
   const totalUSD = expenses
-    .filter((e) => e.currency === "USD" && e.expenseType === "REALIZED")
+    .filter(
+      (e) =>
+        (e.currency === "USD_ZELLE" || e.currency === "USD_EFECTIVO") &&
+        e.expenseType === "REALIZED"
+    )
     .reduce((sum, e) => sum + e.amount, 0);
   const totalUSDT = expenses
     .filter((e) => e.currency === "USDT" && e.expenseType === "REALIZED")
+    .reduce((sum, e) => sum + e.amount, 0);
+  const totalCUP = expenses
+    .filter(
+      (e) =>
+        (e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA") &&
+        e.expenseType === "REALIZED"
+    )
     .reduce((sum, e) => sum + e.amount, 0);
 
   if (loading) {
@@ -154,7 +166,7 @@ export default function ExpensesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card className="bg-zinc-900 border border-zinc-800">
           <CardBody className="p-4">
             <p className="text-zinc-400 text-sm">Total USD</p>
@@ -165,6 +177,12 @@ export default function ExpensesPage() {
           <CardBody className="p-4">
             <p className="text-zinc-400 text-sm">Total USDT</p>
             <p className="text-2xl font-bold text-rose-400">{totalUSDT.toFixed(2)} USDT</p>
+          </CardBody>
+        </Card>
+        <Card className="bg-zinc-900 border border-zinc-800">
+          <CardBody className="p-4">
+            <p className="text-zinc-400 text-sm">Total CUP</p>
+            <p className="text-2xl font-bold text-rose-400">{totalCUP.toFixed(2)} CUP</p>
           </CardBody>
         </Card>
         <Card className="bg-zinc-900 border border-zinc-800">
@@ -328,9 +346,7 @@ export default function ExpensesPage() {
                   </TableCell>
                   <TableCell>
                     <span className="text-rose-400 font-semibold">
-                      {expense.currency === "USD" ? "$" : ""}
-                      {expense.amount.toFixed(2)}
-                      {expense.currency === "USDT" ? " USDT" : ""}
+                      {formatCurrency(expense.amount, expense.currency)}
                     </span>
                   </TableCell>
                   <TableCell>

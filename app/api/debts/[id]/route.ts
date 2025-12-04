@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getBalanceField } from "@/features/debts/utils";
 
 export async function GET(
   request: NextRequest,
@@ -111,7 +112,7 @@ export async function DELETE(
 
   if (!debt.isPaid) {
     const remaining = debt.amount - debt.paidAmount;
-    const field = debt.currency === "USD" ? "balanceUSD" : "balanceUSDT";
+    const field = getBalanceField(debt.currency);
     await prisma.account.update({
       where: { id: debt.accountId },
       data: { [field]: { increment: remaining } },
@@ -132,4 +133,3 @@ export async function DELETE(
 
   return NextResponse.json({ success: true });
 }
-

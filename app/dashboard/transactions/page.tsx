@@ -14,7 +14,9 @@ import {
   TableCell,
 } from "@heroui/table";
 import { Chip } from "@heroui/chip";
-import { Transaction, TransactionType, Change } from "@/types";
+import { TransactionType } from "@/shared/types";
+import { Transaction, Change } from "@/features/transactions";
+import { formatCurrency } from "@/shared/utils";
 
 const typeLabels: Record<TransactionType, string> = {
   EXPENSE: "Gasto",
@@ -236,9 +238,7 @@ export default function TransactionsPage() {
                           transaction.type === "DEBT_PAYMENT"
                             ? "-"
                             : "+"}
-                          {transaction.currency === "USD" ? "$" : ""}
-                          {Math.abs(transaction.amount).toFixed(2)}
-                          {transaction.currency === "USDT" ? " USDT" : ""}
+                          {formatCurrency(Math.abs(transaction.amount), transaction.currency)}
                         </span>
                       </TableCell>
                     </TableRow>

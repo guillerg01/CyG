@@ -16,7 +16,7 @@ export function useApi<T>() {
   });
 
   const request = useCallback(
-    async (url: string, options?: RequestInit): Promise<T | null> => {
+    async <R = T>(url: string, options?: RequestInit): Promise<R | null> => {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
       try {
@@ -33,8 +33,8 @@ export function useApi<T>() {
           throw new Error(errorData.error || "Request failed");
         }
 
-        const data = await response.json();
-        setState({ data, loading: false, error: null });
+        const data: R = await response.json();
+        setState({ data: data as unknown as T, loading: false, error: null });
         return data;
       } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
@@ -46,27 +46,32 @@ export function useApi<T>() {
   );
 
   const get = useCallback(
-    (url: string) => request(url, { method: "GET" }),
+    async <R = T>(url: string): Promise<R | null> => {
+      return request<R>(url, { method: "GET" });
+    },
     [request]
   );
 
   const post = useCallback(
-    (url: string, body: unknown) =>
-      request(url, { method: "POST", body: JSON.stringify(body) }),
+    async <R = T>(url: string, body: unknown): Promise<R | null> => {
+      return request<R>(url, { method: "POST", body: JSON.stringify(body) });
+    },
     [request]
   );
 
   const put = useCallback(
-    (url: string, body: unknown) =>
-      request(url, { method: "PUT", body: JSON.stringify(body) }),
+    async <R = T>(url: string, body: unknown): Promise<R | null> => {
+      return request<R>(url, { method: "PUT", body: JSON.stringify(body) });
+    },
     [request]
   );
 
   const del = useCallback(
-    (url: string) => request(url, { method: "DELETE" }),
+    async (url: string): Promise<null> => {
+      return request(url, { method: "DELETE" });
+    },
     [request]
   );
 
   return { ...state, get, post, put, del, request };
 }
-

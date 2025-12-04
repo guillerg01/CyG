@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
-import { Account, Currency } from "@/types";
+import { Account, Currency } from "@/shared/types";
+import { IncomeFormData } from "../types";
 
 interface IncomeFormProps {
   accounts: Account[];
@@ -14,17 +15,12 @@ interface IncomeFormProps {
   loading?: boolean;
 }
 
-export interface IncomeFormData {
-  amount: number;
-  description: string;
-  currency: Currency;
-  accountId: string;
-  createdAt?: string;
-}
-
 const currencies: { key: Currency; label: string }[] = [
-  { key: "USD", label: "USD ($)" },
+  { key: "USD_ZELLE", label: "USD Zelle" },
+  { key: "USD_EFECTIVO", label: "USD Efectivo" },
   { key: "USDT", label: "USDT" },
+  { key: "CUP_EFECTIVO", label: "CUP Efectivo" },
+  { key: "CUP_TRANSFERENCIA", label: "CUP Transferencia" },
 ];
 
 export function IncomeForm({
@@ -37,7 +33,7 @@ export function IncomeForm({
   const [formData, setFormData] = useState<IncomeFormData>({
     amount: initialData?.amount || 0,
     description: initialData?.description || "",
-    currency: initialData?.currency || "USD",
+    currency: initialData?.currency || "USD_ZELLE",
     accountId: initialData?.accountId || "",
     createdAt: initialData?.createdAt || "",
   });

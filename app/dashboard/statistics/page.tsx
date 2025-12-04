@@ -5,7 +5,8 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Select, SelectItem } from "@heroui/select";
 import { Input } from "@heroui/input";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Statistics, User } from "@/types";
+import { User } from "@/shared/types";
+import { Statistics } from "@/features/statistics";
 
 export default function StatisticsPage() {
   const [statistics, setStatistics] = useState<Statistics | null>(null);
@@ -64,12 +65,12 @@ export default function StatisticsPage() {
   const monthlyExpenses = statistics?.monthly.expenses || {};
   const monthlyIncomes = statistics?.monthly.incomes || {};
 
-  const sortedMonths = [
-    ...new Set([...Object.keys(monthlyExpenses), ...Object.keys(monthlyIncomes)]),
-  ].sort();
+  const sortedMonths = Array.from(
+    new Set([...Object.keys(monthlyExpenses), ...Object.keys(monthlyIncomes)])
+  ).sort();
 
   const maxCategoryTotal = Math.max(
-    ...Object.values(categoryData).map((v) => v.USD + v.USDT),
+    ...Object.values(categoryData).map((v) => v.USD + v.USDT + v.CUP),
     1
   );
 
@@ -138,7 +139,7 @@ export default function StatisticsPage() {
       >
         <Tab key="general" title="General">
           <div className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
               <Card className="bg-gradient-to-br from-emerald-900/50 to-emerald-950 border border-emerald-700/50">
                 <CardBody className="p-5">
                   <p className="text-emerald-300 text-sm">Ingresos USD</p>
@@ -155,6 +156,14 @@ export default function StatisticsPage() {
                   </p>
                 </CardBody>
               </Card>
+              <Card className="bg-gradient-to-br from-amber-900/50 to-amber-950 border border-amber-700/50">
+                <CardBody className="p-5">
+                  <p className="text-amber-300 text-sm">Ingresos CUP</p>
+                  <p className="text-3xl font-bold text-white">
+                    {(statistics?.totals.incomes.CUP || 0).toFixed(2)}
+                  </p>
+                </CardBody>
+              </Card>
               <Card className="bg-gradient-to-br from-rose-900/50 to-rose-950 border border-rose-700/50">
                 <CardBody className="p-5">
                   <p className="text-rose-300 text-sm">Gastos USD</p>
@@ -163,11 +172,19 @@ export default function StatisticsPage() {
                   </p>
                 </CardBody>
               </Card>
-              <Card className="bg-gradient-to-br from-amber-900/50 to-amber-950 border border-amber-700/50">
+              <Card className="bg-gradient-to-br from-rose-900/50 to-rose-950 border border-rose-700/50">
                 <CardBody className="p-5">
-                  <p className="text-amber-300 text-sm">Gastos USDT</p>
+                  <p className="text-rose-300 text-sm">Gastos USDT</p>
                   <p className="text-3xl font-bold text-white">
                     {(statistics?.totals.expenses.USDT || 0).toFixed(2)}
+                  </p>
+                </CardBody>
+              </Card>
+              <Card className="bg-gradient-to-br from-rose-900/50 to-rose-950 border border-rose-700/50">
+                <CardBody className="p-5">
+                  <p className="text-rose-300 text-sm">Gastos CUP</p>
+                  <p className="text-3xl font-bold text-white">
+                    {(statistics?.totals.expenses.CUP || 0).toFixed(2)}
                   </p>
                 </CardBody>
               </Card>
@@ -193,6 +210,14 @@ export default function StatisticsPage() {
                       className={`text-xl font-bold ${(statistics?.totals.balance.USDT || 0) >= 0 ? "text-blue-400" : "text-rose-400"}`}
                     >
                       {(statistics?.totals.balance.USDT || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center p-4 bg-zinc-800/50 rounded-lg">
+                    <span className="text-zinc-300">Balance CUP</span>
+                    <span
+                      className={`text-xl font-bold ${(statistics?.totals.balance.CUP || 0) >= 0 ? "text-amber-400" : "text-rose-400"}`}
+                    >
+                      {(statistics?.totals.balance.CUP || 0).toFixed(2)}
                     </span>
                   </div>
                 </CardBody>
@@ -238,7 +263,11 @@ export default function StatisticsPage() {
                   <p className="text-zinc-500 text-center py-8">No hay datos de categorias</p>
                 ) : (
                   Object.entries(categoryData).map(([category, amounts]) => {
-                    const total = amounts.USD + amounts.USDT;
+                    const total = amounts.USD + amounts.USDT + amounts.CUP;
+                    const maxCategoryTotal = Math.max(
+                      ...Object.values(categoryData).map((v) => v.USD + v.USDT + v.CUP),
+                      1
+                    );
                     const percentage = (total / maxCategoryTotal) * 100;
 
                     return (
@@ -247,8 +276,10 @@ export default function StatisticsPage() {
                           <span className="text-white font-medium">{category}</span>
                           <div className="text-right">
                             <span className="text-emerald-400">${amounts.USD.toFixed(2)}</span>
-                            <span className="text-zinc-500 mx-2">/</span>
-                            <span className="text-blue-400">{amounts.USDT.toFixed(2)} USDT</span>
+                            <span className="text-zinc-500 mx-1">/</span>
+                            <span className="text-blue-400">{amounts.USDT.toFixed(2)}</span>
+                            <span className="text-zinc-500 mx-1">/</span>
+                            <span className="text-amber-400">{amounts.CUP.toFixed(2)}</span>
                           </div>
                         </div>
                         <div className="h-3 bg-zinc-800 rounded-full overflow-hidden flex">
@@ -262,6 +293,12 @@ export default function StatisticsPage() {
                             className="h-full bg-gradient-to-r from-blue-600 to-blue-400"
                             style={{
                               width: `${(amounts.USDT / maxCategoryTotal) * 100}%`,
+                            }}
+                          />
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-600 to-amber-400"
+                            style={{
+                              width: `${(amounts.CUP / maxCategoryTotal) * 100}%`,
                             }}
                           />
                         </div>
@@ -289,10 +326,11 @@ export default function StatisticsPage() {
                 ) : (
                   <div className="space-y-6">
                     {sortedMonths.map((month) => {
-                      const expenses = monthlyExpenses[month] || { USD: 0, USDT: 0 };
-                      const incomes = monthlyIncomes[month] || { USD: 0, USDT: 0 };
+                      const expenses = monthlyExpenses[month] || { USD: 0, USDT: 0, CUP: 0 };
+                      const incomes = monthlyIncomes[month] || { USD: 0, USDT: 0, CUP: 0 };
                       const balanceUSD = incomes.USD - expenses.USD;
                       const balanceUSDT = incomes.USDT - expenses.USDT;
+                      const balanceCUP = incomes.CUP - expenses.CUP;
 
                       const [year, monthNum] = month.split("-");
                       const monthName = new Date(
@@ -305,25 +343,45 @@ export default function StatisticsPage() {
                           <h4 className="text-white font-semibold mb-4 capitalize">
                             {monthName}
                           </h4>
-                          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
                             <div>
-                              <p className="text-zinc-500 text-xs mb-1">Ingresos</p>
+                              <p className="text-zinc-500 text-xs mb-1">Ingresos USD</p>
                               <p className="text-emerald-400 font-semibold">
                                 ${incomes.USD.toFixed(2)}
                               </p>
-                              <p className="text-blue-400 text-sm">
-                                {incomes.USDT.toFixed(2)} USDT
+                            </div>
+                            <div>
+                              <p className="text-zinc-500 text-xs mb-1">Ingresos USDT</p>
+                              <p className="text-blue-400 font-semibold">
+                                {incomes.USDT.toFixed(2)}
                               </p>
                             </div>
                             <div>
-                              <p className="text-zinc-500 text-xs mb-1">Gastos</p>
+                              <p className="text-zinc-500 text-xs mb-1">Ingresos CUP</p>
+                              <p className="text-amber-400 font-semibold">
+                                {incomes.CUP.toFixed(2)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-zinc-500 text-xs mb-1">Gastos USD</p>
                               <p className="text-rose-400 font-semibold">
                                 ${expenses.USD.toFixed(2)}
                               </p>
-                              <p className="text-amber-400 text-sm">
-                                {expenses.USDT.toFixed(2)} USDT
+                            </div>
+                            <div>
+                              <p className="text-zinc-500 text-xs mb-1">Gastos USDT</p>
+                              <p className="text-rose-400 font-semibold">
+                                {expenses.USDT.toFixed(2)}
                               </p>
                             </div>
+                            <div>
+                              <p className="text-zinc-500 text-xs mb-1">Gastos CUP</p>
+                              <p className="text-rose-400 font-semibold">
+                                {expenses.CUP.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-3 gap-4 mt-4">
                             <div>
                               <p className="text-zinc-500 text-xs mb-1">Balance USD</p>
                               <p
@@ -338,6 +396,14 @@ export default function StatisticsPage() {
                                 className={`font-bold ${balanceUSDT >= 0 ? "text-blue-400" : "text-rose-400"}`}
                               >
                                 {balanceUSDT.toFixed(2)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-zinc-500 text-xs mb-1">Balance CUP</p>
+                              <p
+                                className={`font-bold ${balanceCUP >= 0 ? "text-amber-400" : "text-rose-400"}`}
+                              >
+                                {balanceCUP.toFixed(2)}
                               </p>
                             </div>
                           </div>

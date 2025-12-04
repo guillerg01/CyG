@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getBalanceField } from "@/features/loans/utils";
 
 export async function GET(
   request: NextRequest,
@@ -82,7 +83,7 @@ export async function PUT(
     },
   });
 
-  const field = (paymentCurrency || loan.currency) === "USD" ? "balanceUSD" : "balanceUSDT";
+  const field = getBalanceField((paymentCurrency || loan.currency) as any);
   await prisma.account.update({
     where: { id: loan.toAccountId },
     data: { [field]: { decrement: paymentAmount } },
@@ -140,7 +141,7 @@ export async function DELETE(
 
   if (!loan.isPaid) {
     const remaining = loan.amount - loan.paidAmount;
-    const field = loan.currency === "USD" ? "balanceUSD" : "balanceUSDT";
+    const field = getBalanceField(loan.currency);
     await prisma.account.update({
       where: { id: loan.fromAccountId },
       data: { [field]: { increment: remaining } },

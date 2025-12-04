@@ -8,7 +8,9 @@ import { Select, SelectItem } from "@heroui/select";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
 import { Progress } from "@heroui/progress";
 import { Chip } from "@heroui/chip";
-import { Account, Loan, User, Currency } from "@/types";
+import { Account, Currency, User } from "@/shared/types";
+import { Loan } from "@/features/loans";
+import { formatCurrency } from "@/shared/utils";
 
 export default function LoansPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -80,7 +82,7 @@ export default function LoansPage() {
         setFormData({
           amount: 0,
           description: "",
-          currency: "USD",
+          currency: "USD_ZELLE",
           dueDate: "",
           receiverId: "",
           fromAccountId: "",
@@ -110,7 +112,7 @@ export default function LoansPage() {
       if (response.ok) {
         setPayModalOpen(false);
         setSelectedLoan(null);
-        setPaymentData({ paymentAmount: 0, paymentCurrency: "USD", exchangeRate: 1 });
+        setPaymentData({ paymentAmount: 0, paymentCurrency: "USD_ZELLE", exchangeRate: 1 });
         fetchData();
       }
     } finally {
@@ -213,9 +215,7 @@ export default function LoansPage() {
                     <div className="flex justify-between text-sm">
                       <span className="text-zinc-400">Monto</span>
                       <span className="text-white">
-                        {loan.currency === "USD" ? "$" : ""}
-                        {loan.amount.toFixed(2)}
-                        {loan.currency === "USDT" ? " USDT" : ""}
+                        {formatCurrency(loan.amount, loan.currency)}
                       </span>
                     </div>
                     <Progress
@@ -279,9 +279,7 @@ export default function LoansPage() {
                     <div className="flex justify-between text-sm">
                       <span className="text-zinc-400">Monto</span>
                       <span className="text-white">
-                        {loan.currency === "USD" ? "$" : ""}
-                        {loan.amount.toFixed(2)}
-                        {loan.currency === "USDT" ? " USDT" : ""}
+                        {formatCurrency(loan.amount, loan.currency)}
                       </span>
                     </div>
                     <Progress

@@ -71,7 +71,14 @@ export async function register(email: string, password: string, name: string) {
   });
 
   const defaultAccount = await prisma.account.create({
-    data: { name: "Personal", balanceUSD: 0, balanceUSDT: 0 },
+    data: {
+      name: "Personal",
+      balanceUSDZelle: 0,
+      balanceUSDEfectivo: 0,
+      balanceUSDT: 0,
+      balanceCUPEfectivo: 0,
+      balanceCUPTransferencia: 0,
+    },
   });
 
   await prisma.userAccount.create({

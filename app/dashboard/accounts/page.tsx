@@ -6,7 +6,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Switch } from "@heroui/switch";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
-import { Account } from "@/types";
+import { Account } from "@/shared/types";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
 
 export default function AccountsPage() {
@@ -86,8 +86,15 @@ export default function AccountsPage() {
     setModalOpen(true);
   };
 
-  const totalUSD = accounts.reduce((sum, a) => sum + a.balanceUSD, 0);
+  const totalUSD = accounts.reduce(
+    (sum, a) => sum + a.balanceUSDZelle + a.balanceUSDEfectivo,
+    0
+  );
   const totalUSDT = accounts.reduce((sum, a) => sum + a.balanceUSDT, 0);
+  const totalCUP = accounts.reduce(
+    (sum, a) => sum + a.balanceCUPEfectivo + a.balanceCUPTransferencia,
+    0
+  );
 
   if (loading) {
     return (
@@ -109,7 +116,7 @@ export default function AccountsPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-emerald-900/50 to-emerald-950 border border-emerald-700/50">
           <CardBody className="p-5">
             <p className="text-emerald-300 text-sm">Balance Total USD</p>
@@ -120,6 +127,12 @@ export default function AccountsPage() {
           <CardBody className="p-5">
             <p className="text-blue-300 text-sm">Balance Total USDT</p>
             <p className="text-3xl font-bold text-white">{totalUSDT.toFixed(2)} USDT</p>
+          </CardBody>
+        </Card>
+        <Card className="bg-gradient-to-br from-amber-900/50 to-amber-950 border border-amber-700/50">
+          <CardBody className="p-5">
+            <p className="text-amber-300 text-sm">Balance Total CUP</p>
+            <p className="text-3xl font-bold text-white">{totalCUP.toFixed(2)} CUP</p>
           </CardBody>
         </Card>
         <Card className="bg-zinc-900 border border-zinc-800">
@@ -163,21 +176,45 @@ export default function AccountsPage() {
               </div>
             </CardHeader>
             <CardBody className="pt-0">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 bg-zinc-800/50 rounded-lg">
-                  <span className="text-zinc-400">USD</span>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center p-2 bg-zinc-800/50 rounded-lg">
+                  <span className="text-zinc-400 text-xs">USD Zelle</span>
                   <span
-                    className={`font-bold text-lg ${account.balanceUSD >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+                    className={`font-bold text-sm ${account.balanceUSDZelle >= 0 ? "text-emerald-400" : "text-rose-400"}`}
                   >
-                    ${account.balanceUSD.toFixed(2)}
+                    ${account.balanceUSDZelle.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-zinc-800/50 rounded-lg">
-                  <span className="text-zinc-400">USDT</span>
+                <div className="flex justify-between items-center p-2 bg-zinc-800/50 rounded-lg">
+                  <span className="text-zinc-400 text-xs">USD Efectivo</span>
                   <span
-                    className={`font-bold text-lg ${account.balanceUSDT >= 0 ? "text-blue-400" : "text-rose-400"}`}
+                    className={`font-bold text-sm ${account.balanceUSDEfectivo >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+                  >
+                    ${account.balanceUSDEfectivo.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-zinc-800/50 rounded-lg">
+                  <span className="text-zinc-400 text-xs">USDT</span>
+                  <span
+                    className={`font-bold text-sm ${account.balanceUSDT >= 0 ? "text-blue-400" : "text-rose-400"}`}
                   >
                     {account.balanceUSDT.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-zinc-800/50 rounded-lg">
+                  <span className="text-zinc-400 text-xs">CUP Efectivo</span>
+                  <span
+                    className={`font-bold text-sm ${account.balanceCUPEfectivo >= 0 ? "text-amber-400" : "text-rose-400"}`}
+                  >
+                    {account.balanceCUPEfectivo.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 bg-zinc-800/50 rounded-lg">
+                  <span className="text-zinc-400 text-xs">CUP Transferencia</span>
+                  <span
+                    className={`font-bold text-sm ${account.balanceCUPTransferencia >= 0 ? "text-amber-400" : "text-rose-400"}`}
+                  >
+                    {account.balanceCUPTransferencia.toFixed(2)}
                   </span>
                 </div>
               </div>

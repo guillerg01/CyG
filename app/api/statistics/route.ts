@@ -40,16 +40,22 @@ export async function GET(request: NextRequest) {
   });
 
   const totalExpensesUSD = expenses
-    .filter((e) => e.currency === "USD")
+    .filter((e) => e.currency === "USD_ZELLE" || e.currency === "USD_EFECTIVO")
     .reduce((sum, e) => sum + e.amount, 0);
   const totalExpensesUSDT = expenses
     .filter((e) => e.currency === "USDT")
     .reduce((sum, e) => sum + e.amount, 0);
+  const totalExpensesCUP = expenses
+    .filter((e) => e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA")
+    .reduce((sum, e) => sum + e.amount, 0);
   const totalIncomesUSD = incomes
-    .filter((i) => i.currency === "USD")
+    .filter((i) => i.currency === "USD_ZELLE" || i.currency === "USD_EFECTIVO")
     .reduce((sum, i) => sum + i.amount, 0);
   const totalIncomesUSDT = incomes
     .filter((i) => i.currency === "USDT")
+    .reduce((sum, i) => sum + i.amount, 0);
+  const totalIncomesCUP = incomes
+    .filter((i) => i.currency === "CUP_EFECTIVO" || i.currency === "CUP_TRANSFERENCIA")
     .reduce((sum, i) => sum + i.amount, 0);
 
   const expensesByCash = expenses
@@ -63,12 +69,18 @@ export async function GET(request: NextRequest) {
     (acc, e) => {
       const key = e.category.name;
       if (!acc[key]) {
-        acc[key] = { USD: 0, USDT: 0 };
+        acc[key] = { USD: 0, USDT: 0, CUP: 0 };
       }
-      acc[key][e.currency] += e.amount;
+      if (e.currency === "USD_ZELLE" || e.currency === "USD_EFECTIVO") {
+        acc[key].USD += e.amount;
+      } else if (e.currency === "USDT") {
+        acc[key].USDT += e.amount;
+      } else if (e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA") {
+        acc[key].CUP += e.amount;
+      }
       return acc;
     },
-    {} as Record<string, { USD: number; USDT: number }>
+    {} as Record<string, { USD: number; USDT: number; CUP: number }>
   );
 
   const monthlyExpenses = expenses.reduce(
@@ -76,12 +88,18 @@ export async function GET(request: NextRequest) {
       const date = new Date(e.createdAt);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       if (!acc[key]) {
-        acc[key] = { USD: 0, USDT: 0 };
+        acc[key] = { USD: 0, USDT: 0, CUP: 0 };
       }
-      acc[key][e.currency] += e.amount;
+      if (e.currency === "USD_ZELLE" || e.currency === "USD_EFECTIVO") {
+        acc[key].USD += e.amount;
+      } else if (e.currency === "USDT") {
+        acc[key].USDT += e.amount;
+      } else if (e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA") {
+        acc[key].CUP += e.amount;
+      }
       return acc;
     },
-    {} as Record<string, { USD: number; USDT: number }>
+    {} as Record<string, { USD: number; USDT: number; CUP: number }>
   );
 
   const monthlyIncomes = incomes.reduce(
@@ -89,21 +107,28 @@ export async function GET(request: NextRequest) {
       const date = new Date(i.createdAt);
       const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       if (!acc[key]) {
-        acc[key] = { USD: 0, USDT: 0 };
+        acc[key] = { USD: 0, USDT: 0, CUP: 0 };
       }
-      acc[key][i.currency] += i.amount;
+      if (i.currency === "USD_ZELLE" || i.currency === "USD_EFECTIVO") {
+        acc[key].USD += i.amount;
+      } else if (i.currency === "USDT") {
+        acc[key].USDT += i.amount;
+      } else if (i.currency === "CUP_EFECTIVO" || i.currency === "CUP_TRANSFERENCIA") {
+        acc[key].CUP += i.amount;
+      }
       return acc;
     },
-    {} as Record<string, { USD: number; USDT: number }>
+    {} as Record<string, { USD: number; USDT: number; CUP: number }>
   );
 
   return NextResponse.json({
     totals: {
-      expenses: { USD: totalExpensesUSD, USDT: totalExpensesUSDT },
-      incomes: { USD: totalIncomesUSD, USDT: totalIncomesUSDT },
+      expenses: { USD: totalExpensesUSD, USDT: totalExpensesUSDT, CUP: totalExpensesCUP },
+      incomes: { USD: totalIncomesUSD, USDT: totalIncomesUSDT, CUP: totalIncomesCUP },
       balance: {
         USD: totalIncomesUSD - totalExpensesUSD,
         USDT: totalIncomesUSDT - totalExpensesUSDT,
+        CUP: totalIncomesCUP - totalExpensesCUP,
       },
     },
     byPaymentMethod: {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getBalanceField } from "@/features/expenses/utils";
 
 export async function GET(
   request: NextRequest,
@@ -61,14 +62,14 @@ export async function PUT(
   } = body;
 
   if (existing.expenseType !== "PLANNED" && amount !== undefined) {
-    const oldField = existing.currency === "USD" ? "balanceUSD" : "balanceUSDT";
+    const oldField = getBalanceField(existing.currency);
     await prisma.account.update({
       where: { id: existing.accountId },
       data: { [oldField]: { increment: existing.amount } },
     });
 
     const newCurrency = currency || existing.currency;
-    const newField = newCurrency === "USD" ? "balanceUSD" : "balanceUSDT";
+    const newField = getBalanceField(newCurrency);
     await prisma.account.update({
       where: { id: existing.accountId },
       data: { [newField]: { decrement: amount } },
@@ -129,7 +130,7 @@ export async function DELETE(
   }
 
   if (existing.expenseType !== "PLANNED") {
-    const field = existing.currency === "USD" ? "balanceUSD" : "balanceUSDT";
+    const field = getBalanceField(existing.currency);
     await prisma.account.update({
       where: { id: existing.accountId },
       data: { [field]: { increment: existing.amount } },

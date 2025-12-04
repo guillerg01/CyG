@@ -5,7 +5,7 @@ import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
-import { User, Category } from "@/types";
+import { User, Category } from "@/shared/types";
 
 export default function SettingsPage() {
   const [user, setUser] = useState<User | null>(null);

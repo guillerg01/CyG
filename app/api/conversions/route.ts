@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getBalanceField } from "@/features/conversions/utils";
 
 export async function GET(request: NextRequest) {
   const session = await getSession();
@@ -57,8 +58,8 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const fromField = fromCurrency === "USD" ? "balanceUSD" : "balanceUSDT";
-  const toField = toCurrency === "USD" ? "balanceUSD" : "balanceUSDT";
+  const fromField = getBalanceField(fromCurrency);
+  const toField = getBalanceField(toCurrency);
 
   await prisma.account.update({
     where: { id: accountId },

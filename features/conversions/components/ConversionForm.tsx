@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
-import { Account, Currency } from "@/types";
+import { Account, Currency } from "@/shared/types";
+import { formatCurrency } from "@/shared/utils";
+import { ConversionFormData } from "../types";
 
 interface ConversionFormProps {
   accounts: Account[];
@@ -13,17 +15,12 @@ interface ConversionFormProps {
   loading?: boolean;
 }
 
-export interface ConversionFormData {
-  fromAmount: number;
-  fromCurrency: Currency;
-  toCurrency: Currency;
-  exchangeRate: number;
-  accountId: string;
-}
-
 const currencies: { key: Currency; label: string }[] = [
-  { key: "USD", label: "USD ($)" },
+  { key: "USD_ZELLE", label: "USD Zelle" },
+  { key: "USD_EFECTIVO", label: "USD Efectivo" },
   { key: "USDT", label: "USDT" },
+  { key: "CUP_EFECTIVO", label: "CUP Efectivo" },
+  { key: "CUP_TRANSFERENCIA", label: "CUP Transferencia" },
 ];
 
 export function ConversionForm({
@@ -34,7 +31,7 @@ export function ConversionForm({
 }: ConversionFormProps) {
   const [formData, setFormData] = useState<ConversionFormData>({
     fromAmount: 0,
-    fromCurrency: "USD",
+    fromCurrency: "USD_ZELLE",
     toCurrency: "USDT",
     exchangeRate: 1,
     accountId: "",
@@ -76,8 +73,10 @@ export function ConversionForm({
       >
         {accounts.map((a) => (
           <SelectItem key={a.id}>
-            {a.name} (${a.balanceUSD.toFixed(2)} USD /{" "}
-            {a.balanceUSDT.toFixed(2)} USDT)
+            {a.name} (USD Z: ${a.balanceUSDZelle.toFixed(2)} / USD E: $
+            {a.balanceUSDEfectivo.toFixed(2)} / USDT: {a.balanceUSDT.toFixed(2)}{" "}
+            / CUP E: {a.balanceCUPEfectivo.toFixed(2)} / CUP T:{" "}
+            {a.balanceCUPTransferencia.toFixed(2)})
           </SelectItem>
         ))}
       </Select>
@@ -170,8 +169,7 @@ export function ConversionForm({
       <div className="p-4 bg-zinc-800 rounded-lg text-center">
         <p className="text-zinc-400 text-sm">Recibiras</p>
         <p className="text-2xl font-bold text-emerald-400">
-          {formData.toCurrency === "USD" ? "$" : ""}
-          {toAmount.toFixed(2)} {formData.toCurrency === "USDT" ? "USDT" : ""}
+          {formatCurrency(toAmount, formData.toCurrency)}
         </p>
       </div>
 

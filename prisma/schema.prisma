@@ -8,8 +8,11 @@ datasource db {
 }
 
 enum Currency {
-    USD
+    USD_ZELLE
+    USD_EFECTIVO
     USDT
+    CUP_EFECTIVO
+    CUP_TRANSFERENCIA
 }
 
 enum PaymentMethod {
@@ -55,13 +58,16 @@ model User {
 }
 
 model Account {
-    id          String   @id @default(cuid())
-    name        String
-    balanceUSD  Float    @default(0)
-    balanceUSDT Float    @default(0)
-    isShared    Boolean  @default(false)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+    id                      String   @id @default(cuid())
+    name                    String
+    balanceUSDZelle         Float    @default(0)
+    balanceUSDEfectivo      Float    @default(0)
+    balanceUSDT             Float    @default(0)
+    balanceCUPEfectivo      Float    @default(0)
+    balanceCUPTransferencia Float    @default(0)
+    isShared                Boolean  @default(false)
+    createdAt               DateTime @default(now())
+    updatedAt               DateTime @updatedAt
 
     users        UserAccount[]
     expenses     Expense[]

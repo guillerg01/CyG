@@ -13,9 +13,10 @@ import {
   TableRow,
   TableCell,
 } from "@heroui/table";
-import { IncomeForm, IncomeFormData } from "@/components/forms/IncomeForm";
-import { Account, Income } from "@/types";
+import { IncomeForm, IncomeFormData, Income } from "@/features/incomes";
+import { Account } from "@/shared/types";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { formatCurrency } from "@/shared/utils";
 
 export default function IncomesPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -65,7 +66,9 @@ export default function IncomesPage() {
   const handleSubmit = async (data: IncomeFormData) => {
     setSubmitting(true);
     try {
-      const url = editingIncome ? `/api/incomes/${editingIncome.id}` : "/api/incomes";
+      const url = editingIncome
+        ? `/api/incomes/${editingIncome.id}`
+        : "/api/incomes";
       const method = editingIncome ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -101,10 +104,15 @@ export default function IncomesPage() {
   };
 
   const totalUSD = incomes
-    .filter((i) => i.currency === "USD")
+    .filter((i) => i.currency === "USD_ZELLE" || i.currency === "USD_EFECTIVO")
     .reduce((sum, i) => sum + i.amount, 0);
   const totalUSDT = incomes
     .filter((i) => i.currency === "USDT")
+    .reduce((sum, i) => sum + i.amount, 0);
+  const totalCUP = incomes
+    .filter(
+      (i) => i.currency === "CUP_EFECTIVO" || i.currency === "CUP_TRANSFERENCIA"
+    )
     .reduce((sum, i) => sum + i.amount, 0);
 
   if (loading) {
@@ -133,17 +141,29 @@ export default function IncomesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-zinc-900 border border-zinc-800">
           <CardBody className="p-4">
             <p className="text-zinc-400 text-sm">Total USD</p>
-            <p className="text-2xl font-bold text-emerald-400">${totalUSD.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-emerald-400">
+              ${totalUSD.toFixed(2)}
+            </p>
           </CardBody>
         </Card>
         <Card className="bg-zinc-900 border border-zinc-800">
           <CardBody className="p-4">
             <p className="text-zinc-400 text-sm">Total USDT</p>
-            <p className="text-2xl font-bold text-emerald-400">{totalUSDT.toFixed(2)} USDT</p>
+            <p className="text-2xl font-bold text-emerald-400">
+              {totalUSDT.toFixed(2)} USDT
+            </p>
+          </CardBody>
+        </Card>
+        <Card className="bg-zinc-900 border border-zinc-800">
+          <CardBody className="p-4">
+            <p className="text-zinc-400 text-sm">Total CUP</p>
+            <p className="text-2xl font-bold text-emerald-400">
+              {totalCUP.toFixed(2)} CUP
+            </p>
           </CardBody>
         </Card>
         <Card className="bg-zinc-900 border border-zinc-800">
@@ -164,7 +184,9 @@ export default function IncomesPage() {
               type="date"
               label="Desde"
               value={filters.startDate}
-              onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+              onChange={(e) =>
+                setFilters({ ...filters, startDate: e.target.value })
+              }
               classNames={{
                 input: "bg-zinc-800",
                 inputWrapper: "bg-zinc-800 border-zinc-700",
@@ -174,7 +196,9 @@ export default function IncomesPage() {
               type="date"
               label="Hasta"
               value={filters.endDate}
-              onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+              onChange={(e) =>
+                setFilters({ ...filters, endDate: e.target.value })
+              }
               classNames={{
                 input: "bg-zinc-800",
                 inputWrapper: "bg-zinc-800 border-zinc-700",
@@ -217,16 +241,18 @@ export default function IncomesPage() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className="text-white">{income.description || "-"}</span>
+                    <span className="text-white">
+                      {income.description || "-"}
+                    </span>
                   </TableCell>
                   <TableCell>
-                    <span className="text-zinc-400">{income.account?.name || "-"}</span>
+                    <span className="text-zinc-400">
+                      {income.account?.name || "-"}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <span className="text-emerald-400 font-semibold">
-                      {income.currency === "USD" ? "$" : ""}
-                      {income.amount.toFixed(2)}
-                      {income.currency === "USDT" ? " USDT" : ""}
+                      {formatCurrency(income.amount, income.currency)}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -299,4 +325,3 @@ export default function IncomesPage() {
     </div>
   );
 }
-

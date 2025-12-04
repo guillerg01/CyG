@@ -31,8 +31,11 @@ async function main() {
   const personalAccount = await prisma.account.create({
     data: {
       name: "Personal",
-      balanceUSD: 1000,
-      balanceUSDT: 500,
+      balanceUSDZelle: 1000,
+      balanceUSDEfectivo: 500,
+      balanceUSDT: 300,
+      balanceCUPEfectivo: 0,
+      balanceCUPTransferencia: 0,
       isShared: false,
     },
   });
@@ -40,8 +43,11 @@ async function main() {
   const sharedAccount = await prisma.account.create({
     data: {
       name: "Casa",
-      balanceUSD: 2000,
-      balanceUSDT: 1000,
+      balanceUSDZelle: 2000,
+      balanceUSDEfectivo: 1000,
+      balanceUSDT: 500,
+      balanceCUPEfectivo: 0,
+      balanceCUPTransferencia: 0,
       isShared: true,
     },
   });

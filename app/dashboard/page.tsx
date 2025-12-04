@@ -4,18 +4,19 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
-import { StatCard } from "@/components/ui/StatCard";
-import { TransactionItem } from "@/components/ui/TransactionItem";
-import { ExpenseForm, ExpenseFormData } from "@/components/forms/ExpenseForm";
-import { IncomeForm, IncomeFormData } from "@/components/forms/IncomeForm";
-import { ConversionForm, ConversionFormData } from "@/components/forms/ConversionForm";
-import { Account, Category, Expense, Income, Statistics } from "@/types";
+import { StatCard, TransactionItem } from "@/shared/components";
+import { ExpenseForm, ExpenseFormData, Expense } from "@/features/expenses";
+import { IncomeForm, IncomeFormData, Income } from "@/features/incomes";
+import { ConversionForm, ConversionFormData } from "@/features/conversions";
+import { Account, Category } from "@/shared/types";
+import { Statistics } from "@/features/statistics";
 import {
   IconCurrencyDollar,
   IconCoins,
   IconTrendingDown,
   IconTrendingUp,
 } from "@tabler/icons-react";
+import { formatCurrency } from "@/shared/utils";
 
 type ModalType = "expense" | "income" | "conversion" | null;
 
@@ -117,8 +118,15 @@ export default function DashboardPage() {
     }
   };
 
-  const totalBalanceUSD = accounts.reduce((sum, a) => sum + a.balanceUSD, 0);
+  const totalBalanceUSD = accounts.reduce(
+    (sum, a) => sum + a.balanceUSDZelle + a.balanceUSDEfectivo,
+    0
+  );
   const totalBalanceUSDT = accounts.reduce((sum, a) => sum + a.balanceUSDT, 0);
+  const totalBalanceCUP = accounts.reduce(
+    (sum, a) => sum + a.balanceCUPEfectivo + a.balanceCUPTransferencia,
+    0
+  );
 
   if (loading) {
     return (
@@ -133,7 +141,9 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-zinc-400 text-sm">Resumen de tu situacion financiera</p>
+          <p className="text-zinc-400 text-sm">
+            Resumen de tu situacion financiera
+          </p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -158,7 +168,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard
           title="Balance USD"
           value={`$${totalBalanceUSD.toFixed(2)}`}
@@ -172,16 +182,22 @@ export default function DashboardPage() {
           icon={<IconCoins className="w-6 h-6 text-blue-400" />}
         />
         <StatCard
+          title="Balance CUP"
+          value={`${totalBalanceCUP.toFixed(2)} CUP`}
+          variant={totalBalanceCUP >= 0 ? "success" : "danger"}
+          icon={<IconCurrencyDollar className="w-6 h-6 text-amber-400" />}
+        />
+        <StatCard
           title="Gastos del Mes"
           value={`$${(statistics?.totals.expenses.USD || 0).toFixed(2)}`}
-          subtitle={`${(statistics?.totals.expenses.USDT || 0).toFixed(2)} USDT`}
+          subtitle={`${(statistics?.totals.expenses.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.expenses.CUP || 0).toFixed(2)} CUP`}
           variant="warning"
           icon={<IconTrendingDown className="w-6 h-6 text-amber-400" />}
         />
         <StatCard
           title="Ingresos del Mes"
           value={`$${(statistics?.totals.incomes.USD || 0).toFixed(2)}`}
-          subtitle={`${(statistics?.totals.incomes.USDT || 0).toFixed(2)} USDT`}
+          subtitle={`${(statistics?.totals.incomes.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.incomes.CUP || 0).toFixed(2)} CUP`}
           variant="success"
           icon={<IconTrendingUp className="w-6 h-6 text-emerald-400" />}
         />
@@ -203,7 +219,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardBody className="space-y-2">
             {recentExpenses.length === 0 ? (
-              <p className="text-zinc-500 text-center py-8">No hay gastos registrados</p>
+              <p className="text-zinc-500 text-center py-8">
+                No hay gastos registrados
+              </p>
             ) : (
               recentExpenses.map((expense) => (
                 <TransactionItem
@@ -223,7 +241,9 @@ export default function DashboardPage() {
 
         <Card className="bg-zinc-900 border border-zinc-800">
           <CardHeader className="flex justify-between items-center pb-2">
-            <h2 className="text-lg font-semibold text-white">Ultimos Ingresos</h2>
+            <h2 className="text-lg font-semibold text-white">
+              Ultimos Ingresos
+            </h2>
             <Button
               variant="light"
               size="sm"
@@ -236,7 +256,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardBody className="space-y-2">
             {recentIncomes.length === 0 ? (
-              <p className="text-zinc-500 text-center py-8">No hay ingresos registrados</p>
+              <p className="text-zinc-500 text-center py-8">
+                No hay ingresos registrados
+              </p>
             ) : (
               recentIncomes.map((income) => (
                 <TransactionItem
@@ -256,38 +278,62 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="bg-zinc-900 border border-zinc-800 lg:col-span-2">
           <CardHeader>
-            <h2 className="text-lg font-semibold text-white">Gastos por Categoria</h2>
+            <h2 className="text-lg font-semibold text-white">
+              Gastos por Categoria
+            </h2>
           </CardHeader>
           <CardBody>
-            {statistics?.byCategory && Object.keys(statistics.byCategory).length > 0 ? (
+            {statistics?.byCategory &&
+            Object.keys(statistics.byCategory).length > 0 ? (
               <div className="space-y-3">
-                {Object.entries(statistics.byCategory).map(([category, amounts]) => {
-                  const total = amounts.USD + amounts.USDT;
-                  const maxTotal = Math.max(
-                    ...Object.values(statistics.byCategory).map((a) => a.USD + a.USDT)
-                  );
-                  const percentage = (total / maxTotal) * 100;
+                {Object.entries(statistics.byCategory).map(
+                  ([category, amounts]) => {
+                    const total = amounts.USD + amounts.USDT + amounts.CUP;
+                    const maxTotal = Math.max(
+                      ...Object.values(statistics.byCategory).map(
+                        (a) => a.USD + a.USDT + a.CUP
+                      )
+                    );
+                    const percentage = (total / maxTotal) * 100;
 
-                  return (
-                    <div key={category} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-zinc-300">{category}</span>
-                        <span className="text-zinc-400">
-                          ${amounts.USD.toFixed(2)} / {amounts.USDT.toFixed(2)} USDT
-                        </span>
+                    return (
+                      <div key={category} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-zinc-300">{category}</span>
+                          <span className="text-zinc-400 text-xs">
+                            ${amounts.USD.toFixed(2)} /{" "}
+                            {amounts.USDT.toFixed(2)} / {amounts.CUP.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="h-2 bg-zinc-800 rounded-full overflow-hidden flex">
+                          <div
+                            className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400"
+                            style={{
+                              width: `${(amounts.USD / maxTotal) * 100}%`,
+                            }}
+                          />
+                          <div
+                            className="h-full bg-gradient-to-r from-blue-600 to-blue-400"
+                            style={{
+                              width: `${(amounts.USDT / maxTotal) * 100}%`,
+                            }}
+                          />
+                          <div
+                            className="h-full bg-gradient-to-r from-amber-600 to-amber-400"
+                            style={{
+                              width: `${(amounts.CUP / maxTotal) * 100}%`,
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full transition-all"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
             ) : (
-              <p className="text-zinc-500 text-center py-8">No hay datos de categorias</p>
+              <p className="text-zinc-500 text-center py-8">
+                No hay datos de categorias
+              </p>
             )}
           </CardBody>
         </Card>
@@ -306,16 +352,46 @@ export default function DashboardPage() {
                   className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-medium">{account.name}</span>
+                    <span className="text-white font-medium">
+                      {account.name}
+                    </span>
                     {account.isShared && (
                       <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">
                         Compartida
                       </span>
                     )}
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-emerald-400">${account.balanceUSD.toFixed(2)}</span>
-                    <span className="text-blue-400">{account.balanceUSDT.toFixed(2)} USDT</span>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">USD Zelle:</span>
+                      <span className="text-emerald-400">
+                        ${account.balanceUSDZelle.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">USD Efectivo:</span>
+                      <span className="text-emerald-400">
+                        ${account.balanceUSDEfectivo.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">USDT:</span>
+                      <span className="text-blue-400">
+                        {account.balanceUSDT.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">CUP Efectivo:</span>
+                      <span className="text-amber-400">
+                        {account.balanceCUPEfectivo.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-400">CUP Transferencia:</span>
+                      <span className="text-amber-400">
+                        {account.balanceCUPTransferencia.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))
@@ -371,4 +447,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

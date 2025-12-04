@@ -1,7 +1,8 @@
 "use client";
 
-import { Currency, PaymentMethod, TransactionType } from "@/types";
+import { Currency, PaymentMethod, TransactionType } from "@/shared/types";
 import { IconArrowDown, IconArrowUp } from "@tabler/icons-react";
+import { formatCurrency } from "@/shared/utils";
 
 interface TransactionItemProps {
   type: TransactionType | "EXPENSE" | "INCOME";
@@ -76,8 +77,7 @@ export function TransactionItem({
       <div className="text-right">
         <p className={`font-semibold ${config.color}`}>
           {config.sign}
-          {currency === "USD" ? "$" : ""}
-          {amount.toFixed(2)} {currency === "USDT" ? "USDT" : ""}
+          {formatCurrency(amount, currency)}
         </p>
         <p className="text-zinc-500 text-xs">{formattedDate}</p>
       </div>

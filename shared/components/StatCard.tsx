@@ -13,8 +13,10 @@ interface StatCardProps {
 
 const variantStyles = {
   default: "bg-gradient-to-br from-zinc-800 to-zinc-900 border-zinc-700",
-  success: "bg-gradient-to-br from-emerald-900/50 to-emerald-950 border-emerald-700/50",
-  warning: "bg-gradient-to-br from-amber-900/50 to-amber-950 border-amber-700/50",
+  success:
+    "bg-gradient-to-br from-emerald-900/50 to-emerald-950 border-emerald-700/50",
+  warning:
+    "bg-gradient-to-br from-amber-900/50 to-amber-950 border-amber-700/50",
   danger: "bg-gradient-to-br from-rose-900/50 to-rose-950 border-rose-700/50",
 };
 
@@ -39,7 +41,9 @@ export function StatCard({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <p className="text-zinc-400 text-sm font-medium mb-1">{title}</p>
-            <p className={`text-2xl font-bold ${valueStyles[variant]}`}>{value}</p>
+            <p className={`text-2xl font-bold ${valueStyles[variant]}`}>
+              {value}
+            </p>
             {subtitle && (
               <p className="text-zinc-500 text-xs mt-1">{subtitle}</p>
             )}
@@ -55,12 +59,9 @@ export function StatCard({
               </div>
             )}
           </div>
-          {icon && (
-            <div className="p-2 rounded-lg bg-zinc-800/50">{icon}</div>
-          )}
+          {icon && <div className="p-2 rounded-lg bg-zinc-800/50">{icon}</div>}
         </div>
       </CardBody>
     </Card>
   );
 }
-
