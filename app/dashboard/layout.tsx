@@ -69,7 +69,11 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (isMobile && pathname === "/dashboard") {
-      router.replace("/dashboard/quick");
+      const fromLogin = sessionStorage.getItem("fromLogin") === "true";
+      if (fromLogin) {
+        router.replace("/dashboard/quick");
+        sessionStorage.removeItem("fromLogin");
+      }
     }
   }, [isMobile, pathname, router]);
 

@@ -14,7 +14,8 @@ export type TransactionType =
   | "DEBT"
   | "CONVERSION"
   | "LOAN_PAYMENT"
-  | "DEBT_PAYMENT";
+  | "DEBT_PAYMENT"
+  | "TRANSFER";
 
 export interface User {
   id: string;

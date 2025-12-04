@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       data: { balanceCUPEfectivo: { increment: cupAmount } },
     });
 
-    // Buscar y devolver préstamos pendientes de CUP de cuentas personales a la cuenta compartida
+    // Buscar y devolver préstamos pendientes de CUP de cuentas personales (no compartidas) a la cuenta compartida
     const pendingLoans = await prisma.loan.findMany({
       where: {
         toAccountId: accountId,
@@ -136,8 +136,13 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Filtrar solo préstamos desde cuentas personales (no compartidas) hacia la cuenta compartida
+    const personalLoans = pendingLoans.filter(
+      (loan) => !loan.fromAccount.isShared && loan.toAccountId === accountId
+    );
+
     let remainingCUP = cupAmount;
-    for (const loan of pendingLoans) {
+    for (const loan of personalLoans) {
       if (remainingCUP <= 0) break;
 
       const remainingLoan = loan.amount - loan.paidAmount;

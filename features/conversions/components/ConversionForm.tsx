@@ -32,18 +32,27 @@ export function ConversionForm({
   const [formData, setFormData] = useState<ConversionFormData>({
     fromAmount: 0,
     fromCurrency: "USD_ZELLE",
-    toCurrency: "USDT",
-    exchangeRate: 1,
-    accountId: "",
+    toCurrency: "CUP_EFECTIVO",
+    exchangeRate: 440,
+    fromAccountId: "",
+    toAccountId: undefined,
   });
 
   const toAmount = formData.fromAmount * formData.exchangeRate;
 
   useEffect(() => {
-    if (accounts.length > 0 && !formData.accountId) {
-      setFormData((prev) => ({ ...prev, accountId: accounts[0].id }));
+    if (accounts.length > 0 && !formData.fromAccountId) {
+      const bancoPrincipal = accounts.find((a) =>
+        a.name.includes("Banco Principal")
+      );
+      const casaAccount = accounts.find((a) => a.name.includes("Casa"));
+      setFormData((prev) => ({
+        ...prev,
+        fromAccountId: bancoPrincipal?.id || accounts[0].id,
+        toAccountId: casaAccount?.id,
+      }));
     }
-  }, [accounts, formData.accountId]);
+  }, [accounts, formData.fromAccountId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,25 +70,41 @@ export function ConversionForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <Select
-        label="Cuenta"
-        selectedKeys={formData.accountId ? [formData.accountId] : []}
-        onChange={(e) =>
-          setFormData({ ...formData, accountId: e.target.value })
-        }
-        classNames={{
-          trigger: "bg-zinc-800 border-zinc-700",
-        }}
-      >
-        {accounts.map((a) => (
-          <SelectItem key={a.id}>
-            {a.name} (USD Z: ${a.balanceUSDZelle.toFixed(2)} / USD E: $
-            {a.balanceUSDEfectivo.toFixed(2)} / USDT: {a.balanceUSDT.toFixed(2)}{" "}
-            / CUP E: {a.balanceCUPEfectivo.toFixed(2)} / CUP T:{" "}
-            {a.balanceCUPTransferencia.toFixed(2)})
-          </SelectItem>
-        ))}
-      </Select>
+      <div className="grid grid-cols-2 gap-4">
+        <Select
+          label="Cuenta Origen"
+          selectedKeys={formData.fromAccountId ? [formData.fromAccountId] : []}
+          onChange={(e) =>
+            setFormData({ ...formData, fromAccountId: e.target.value })
+          }
+          classNames={{
+            trigger: "bg-zinc-800 border-zinc-700",
+          }}
+        >
+          {accounts.map((a) => (
+            <SelectItem key={a.id}>{a.name}</SelectItem>
+          ))}
+        </Select>
+
+        <Select
+          label="Cuenta Destino (opcional)"
+          selectedKeys={formData.toAccountId ? [formData.toAccountId] : []}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              toAccountId: e.target.value ? e.target.value : undefined,
+            })
+          }
+          classNames={{
+            trigger: "bg-zinc-800 border-zinc-700",
+          }}
+          placeholder="Misma cuenta"
+        >
+          {accounts.map((a) => (
+            <SelectItem key={a.id}>{a.name}</SelectItem>
+          ))}
+        </Select>
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <Input

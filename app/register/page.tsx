@@ -41,6 +41,9 @@ export default function RegisterPage() {
       });
 
       if (response.ok) {
+        if (typeof window !== "undefined" && window.innerWidth < 768) {
+          sessionStorage.setItem("fromLogin", "true");
+        }
         router.push("/dashboard");
       } else {
         const data = await response.json();

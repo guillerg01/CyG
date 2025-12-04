@@ -18,6 +18,7 @@ export interface ConversionFormData {
   fromCurrency: Currency;
   toCurrency: Currency;
   exchangeRate: number;
-  accountId: string;
+  fromAccountId: string;
+  toAccountId?: string;
 }
 

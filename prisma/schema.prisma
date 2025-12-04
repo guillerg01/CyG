@@ -28,6 +28,7 @@ enum TransactionType {
     CONVERSION
     LOAN_PAYMENT
     DEBT_PAYMENT
+    TRANSFER
 }
 
 enum ExpenseType {
@@ -56,6 +57,7 @@ model User {
     loansReceived   Loan[]        @relation("LoanReceiver")
     debts           Debt[]
     conversions     Conversion[]
+    transfers       Transfer[]
     transactions    Transaction[]
     changesAuthored Change[]
 }
@@ -72,14 +74,16 @@ model Account {
     createdAt               DateTime @default(now())
     updatedAt               DateTime @updatedAt
 
-    users        UserAccount[]
-    expenses     Expense[]
-    incomes      Income[]
-    loansFrom    Loan[]        @relation("LoanFromAccount")
-    loansTo      Loan[]        @relation("LoanToAccount")
-    debts        Debt[]
-    conversions  Conversion[]
-    transactions Transaction[]
+    users         UserAccount[]
+    expenses      Expense[]
+    incomes       Income[]
+    loansFrom     Loan[]        @relation("LoanFromAccount")
+    loansTo       Loan[]        @relation("LoanToAccount")
+    transfersFrom Transfer[]    @relation("TransferFromAccount")
+    transfersTo   Transfer[]    @relation("TransferToAccount")
+    debts         Debt[]
+    conversions   Conversion[]
+    transactions  Transaction[]
 }
 
 model UserAccount {
@@ -204,6 +208,23 @@ model Conversion {
     account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 }
 
+model Transfer {
+    id          String   @id @default(cuid())
+    amount      Float
+    description String?
+    currency    Currency
+    createdAt   DateTime @default(now())
+
+    userId        String
+    fromAccountId String
+    toAccountId   String
+
+    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    fromAccount Account  @relation("TransferFromAccount", fields: [fromAccountId], references: [id], onDelete: Cascade)
+    toAccount   Account  @relation("TransferToAccount", fields: [toAccountId], references: [id], onDelete: Cascade)
+    changes     Change[]
+}
+
 model Transaction {
     id          String          @id @default(cuid())
     type        TransactionType
@@ -232,15 +253,17 @@ model Change {
     authorId String
     author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-    expenseId String?
-    incomeId  String?
-    loanId    String?
-    debtId    String?
+    expenseId  String?
+    incomeId   String?
+    loanId     String?
+    debtId     String?
+    transferId String?
 
-    expense Expense? @relation(fields: [expenseId], references: [id], onDelete: SetNull)
-    income  Income?  @relation(fields: [incomeId], references: [id], onDelete: SetNull)
-    loan    Loan?    @relation(fields: [loanId], references: [id], onDelete: SetNull)
-    debt    Debt?    @relation(fields: [debtId], references: [id], onDelete: SetNull)
+    expense  Expense?  @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+    income   Income?   @relation(fields: [incomeId], references: [id], onDelete: SetNull)
+    loan     Loan?     @relation(fields: [loanId], references: [id], onDelete: SetNull)
+    debt     Debt?     @relation(fields: [debtId], references: [id], onDelete: SetNull)
+    transfer Transfer? @relation(fields: [transferId], references: [id], onDelete: SetNull)
 }
 
 model PlannedExpenseAlert {

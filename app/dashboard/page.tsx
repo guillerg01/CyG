@@ -8,6 +8,7 @@ import { StatCard, TransactionItem, DateViewToggle } from "@/shared/components";
 import { ExpenseForm, ExpenseFormData, Expense } from "@/features/expenses";
 import { IncomeForm, IncomeFormData, Income } from "@/features/incomes";
 import { ConversionForm, ConversionFormData } from "@/features/conversions";
+import { TransferForm, TransferFormData } from "@/features/transfers";
 import { Account, Category } from "@/shared/types";
 import { Statistics } from "@/features/statistics";
 import {
@@ -20,7 +21,7 @@ import {
 } from "@tabler/icons-react";
 import { formatCurrency, getMonthRange } from "@/shared/utils";
 
-type ModalType = "expense" | "income" | "conversion" | null;
+type ModalType = "expense" | "income" | "conversion" | "transfer" | null;
 
 export default function DashboardPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -125,6 +126,30 @@ export default function DashboardPage() {
       const response = await fetch("/api/conversions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromAmount: data.fromAmount,
+          fromCurrency: data.fromCurrency,
+          toCurrency: data.toCurrency,
+          exchangeRate: data.exchangeRate,
+          fromAccountId: data.fromAccountId,
+          toAccountId: data.toAccountId,
+        }),
+      });
+      if (response.ok) {
+        setModalOpen(null);
+        fetchData();
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleTransferSubmit = async (data: TransferFormData) => {
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/transfers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
       if (response.ok) {
@@ -185,6 +210,13 @@ export default function DashboardPage() {
             onPress={() => setModalOpen("conversion")}
           >
             Convertir
+          </Button>
+          <Button
+            variant="flat"
+            className="border border-blue-500/50 text-blue-400"
+            onPress={() => setModalOpen("transfer")}
+          >
+            Transferir
           </Button>
         </div>
       </div>
@@ -307,27 +339,13 @@ export default function DashboardPage() {
         </CardBody>
       </Card>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Gastos Categoría Casa"
-          value={`$${(statistics?.totals.houseExpenses?.USD || 0).toFixed(2)}`}
-          subtitle={`${(statistics?.totals.houseExpenses?.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.houseExpenses?.CUP || 0).toFixed(2)} CUP`}
-          variant="warning"
-          icon={<IconHome className="w-6 h-6 text-orange-400" />}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard
           title="Gastos Compartidos"
           value={`$${(statistics?.totals.sharedExpenses?.USD || 0).toFixed(2)}`}
           subtitle={`${(statistics?.totals.sharedExpenses?.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.sharedExpenses?.CUP || 0).toFixed(2)} CUP`}
           variant="warning"
           icon={<IconHome className="w-6 h-6 text-purple-400" />}
-        />
-        <StatCard
-          title="Gastos Personales"
-          value={`$${(statistics?.totals.personalExpenses?.USD || 0).toFixed(2)}`}
-          subtitle={`${(statistics?.totals.personalExpenses?.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.personalExpenses?.CUP || 0).toFixed(2)} CUP`}
-          variant="warning"
-          icon={<IconUser className="w-6 h-6 text-blue-400" />}
         />
         <StatCard
           title="Gastos Planeados"
@@ -549,6 +567,7 @@ export default function DashboardPage() {
             {modalOpen === "expense" && "Agregar Gasto"}
             {modalOpen === "income" && "Agregar Ingreso"}
             {modalOpen === "conversion" && "Convertir Moneda"}
+            {modalOpen === "transfer" && "Transferir Dinero"}
           </ModalHeader>
           <ModalBody className="pb-6">
             {modalOpen === "expense" && (
@@ -572,6 +591,14 @@ export default function DashboardPage() {
               <ConversionForm
                 accounts={accounts}
                 onSubmit={handleConversionSubmit}
+                onCancel={() => setModalOpen(null)}
+                loading={submitting}
+              />
+            )}
+            {modalOpen === "transfer" && (
+              <TransferForm
+                accounts={accounts}
+                onSubmit={handleTransferSubmit}
                 onCancel={() => setModalOpen(null)}
                 loading={submitting}
               />

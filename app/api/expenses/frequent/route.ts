@@ -33,7 +33,11 @@ export async function GET(request: NextRequest) {
       
       if (!acc[key]) {
         acc[key] = {
-          category: expense.category,
+          category: {
+            id: expense.category.id,
+            name: expense.category.name,
+            color: expense.category.color || "#6b7280",
+          },
           currency: expense.currency,
           paymentMethod: expense.paymentMethod,
           amount: expense.amount,
@@ -77,7 +81,11 @@ export async function GET(request: NextRequest) {
     const recentExpenses = expenses
       .slice(0, limit - sortedFrequent.length)
       .map((expense) => ({
-        category: expense.category,
+        category: {
+          id: expense.category.id,
+          name: expense.category.name,
+          color: expense.category.color || "#6b7280",
+        },
         currency: expense.currency,
         paymentMethod: expense.paymentMethod,
         amount: expense.amount,
