@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
-import { StatCard, TransactionItem } from "@/shared/components";
+import { StatCard, TransactionItem, DateViewToggle } from "@/shared/components";
 import { ExpenseForm, ExpenseFormData, Expense } from "@/features/expenses";
 import { IncomeForm, IncomeFormData, Income } from "@/features/incomes";
 import { ConversionForm, ConversionFormData } from "@/features/conversions";
@@ -16,7 +16,7 @@ import {
   IconTrendingDown,
   IconTrendingUp,
 } from "@tabler/icons-react";
-import { formatCurrency } from "@/shared/utils";
+import { formatCurrency, getMonthRange } from "@/shared/utils";
 
 type ModalType = "expense" | "income" | "conversion" | null;
 
@@ -29,16 +29,32 @@ export default function DashboardPage() {
   const [modalOpen, setModalOpen] = useState<ModalType>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isCurrentMonth, setIsCurrentMonth] = useState(true); // Por defecto mes actual
 
   const fetchData = useCallback(async () => {
     try {
+      const params = new URLSearchParams();
+
+      // Si está en modo "mes actual", agregar filtros de fecha
+      if (isCurrentMonth) {
+        const { start, end } = getMonthRange(new Date());
+        params.set("startDate", start.toISOString().split("T")[0]);
+        params.set("endDate", end.toISOString().split("T")[0]);
+      }
+
       const [accountsRes, categoriesRes, expensesRes, incomesRes, statsRes] =
         await Promise.all([
           fetch("/api/accounts"),
           fetch("/api/categories"),
-          fetch("/api/expenses?limit=5"),
-          fetch("/api/incomes?limit=5"),
-          fetch("/api/statistics"),
+          fetch(
+            `/api/expenses?limit=5${params.toString() ? `&${params.toString()}` : ""}`
+          ),
+          fetch(
+            `/api/incomes?limit=5${params.toString() ? `&${params.toString()}` : ""}`
+          ),
+          fetch(
+            `/api/statistics${params.toString() ? `?${params.toString()}` : ""}`
+          ),
         ]);
 
       if (accountsRes.ok) {
@@ -61,11 +77,11 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isCurrentMonth]);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, isCurrentMonth]);
 
   const handleExpenseSubmit = async (data: ExpenseFormData) => {
     setSubmitting(true);
@@ -167,6 +183,11 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      <DateViewToggle
+        isCurrentMonth={isCurrentMonth}
+        onToggle={setIsCurrentMonth}
+      />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard

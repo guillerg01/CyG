@@ -15,6 +15,9 @@ export async function GET() {
       name: true,
       avatar: true,
       incomePercentage: true,
+      monthlyIncomeUSD: true,
+      monthlyIncomeUSDT: true,
+      monthlyIncomeCUP: true,
     },
   });
 
@@ -28,7 +31,7 @@ export async function PUT(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { name, avatar, incomePercentage, pin } = body;
+  const { name, avatar, incomePercentage, monthlyIncomeUSD, monthlyIncomeUSDT, monthlyIncomeCUP, pin } = body;
 
   const updateData: Record<string, unknown> = {};
   if (name) {
@@ -39,6 +42,15 @@ export async function PUT(request: NextRequest) {
   }
   if (incomePercentage !== undefined) {
     updateData.incomePercentage = incomePercentage;
+  }
+  if (monthlyIncomeUSD !== undefined) {
+    updateData.monthlyIncomeUSD = monthlyIncomeUSD;
+  }
+  if (monthlyIncomeUSDT !== undefined) {
+    updateData.monthlyIncomeUSDT = monthlyIncomeUSDT;
+  }
+  if (monthlyIncomeCUP !== undefined) {
+    updateData.monthlyIncomeCUP = monthlyIncomeCUP;
   }
   if (pin) {
     updateData.pin = pin;
@@ -53,6 +65,9 @@ export async function PUT(request: NextRequest) {
       name: true,
       avatar: true,
       incomePercentage: true,
+      monthlyIncomeUSD: true,
+      monthlyIncomeUSDT: true,
+      monthlyIncomeCUP: true,
     },
   });
 

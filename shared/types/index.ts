@@ -22,6 +22,9 @@ export interface User {
   name: string;
   avatar?: string;
   incomePercentage: number;
+  monthlyIncomeUSD?: number;
+  monthlyIncomeUSDT?: number;
+  monthlyIncomeCUP?: number;
   createdAt: string;
 }
 

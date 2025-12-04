@@ -16,6 +16,9 @@ export async function GET() {
       name: true,
       avatar: true,
       incomePercentage: true,
+      monthlyIncomeUSD: true,
+      monthlyIncomeUSDT: true,
+      monthlyIncomeCUP: true,
       createdAt: true,
     },
   });

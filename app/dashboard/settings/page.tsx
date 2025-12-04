@@ -17,7 +17,11 @@ export default function SettingsPage() {
   const [profileData, setProfileData] = useState({
     name: "",
     incomePercentage: 50,
+    monthlyIncomeUSD: 0,
+    monthlyIncomeUSDT: 0,
+    monthlyIncomeCUP: 0,
   });
+  const [sharedAccounts, setSharedAccounts] = useState<any[]>([]);
 
   const [pinData, setPinData] = useState({
     pin: "",
@@ -31,9 +35,10 @@ export default function SettingsPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [userRes, categoriesRes] = await Promise.all([
+      const [userRes, categoriesRes, accountsRes] = await Promise.all([
         fetch("/api/auth/me"),
         fetch("/api/categories"),
+        fetch("/api/accounts"),
       ]);
 
       if (userRes.ok) {
@@ -41,11 +46,20 @@ export default function SettingsPage() {
         setUser(userData);
         setProfileData({
           name: userData.name,
-          incomePercentage: userData.incomePercentage,
+          incomePercentage: userData.incomePercentage || 50,
+          monthlyIncomeUSD: userData.monthlyIncomeUSD || 0,
+          monthlyIncomeUSDT: userData.monthlyIncomeUSDT || 0,
+          monthlyIncomeCUP: userData.monthlyIncomeCUP || 0,
         });
       }
       if (categoriesRes.ok) {
         setCategories(await categoriesRes.json());
+      }
+      if (accountsRes.ok) {
+        const accounts = await accountsRes.json();
+        // Filtrar solo cuentas compartidas
+        const shared = accounts.filter((acc: any) => acc.isShared);
+        setSharedAccounts(shared);
       }
     } catch (err) {
       console.error(err);
@@ -181,6 +195,62 @@ export default function SettingsPage() {
                 }}
               />
 
+              <div className="space-y-2">
+                <p className="text-sm text-zinc-400">Ingresos Mensuales Configurados</p>
+                <Input
+                  label="Ingreso Mensual USD"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={profileData.monthlyIncomeUSD.toString()}
+                  onChange={(e) =>
+                    setProfileData({
+                      ...profileData,
+                      monthlyIncomeUSD: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  description="Ingreso mensual en USD para calcular proporciones de gastos compartidos"
+                  classNames={{
+                    input: "bg-zinc-800",
+                    inputWrapper: "bg-zinc-800 border-zinc-700",
+                  }}
+                />
+                <Input
+                  label="Ingreso Mensual USDT"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={profileData.monthlyIncomeUSDT.toString()}
+                  onChange={(e) =>
+                    setProfileData({
+                      ...profileData,
+                      monthlyIncomeUSDT: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  classNames={{
+                    input: "bg-zinc-800",
+                    inputWrapper: "bg-zinc-800 border-zinc-700",
+                  }}
+                />
+                <Input
+                  label="Ingreso Mensual CUP"
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={profileData.monthlyIncomeCUP.toString()}
+                  onChange={(e) =>
+                    setProfileData({
+                      ...profileData,
+                      monthlyIncomeCUP: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  classNames={{
+                    input: "bg-zinc-800",
+                    inputWrapper: "bg-zinc-800 border-zinc-700",
+                  }}
+                />
+              </div>
+
               <Button
                 type="submit"
                 className="w-full bg-emerald-600 hover:bg-emerald-700"
@@ -188,6 +258,43 @@ export default function SettingsPage() {
               >
                 Guardar Cambios
               </Button>
+            </form>
+          </CardBody>
+        </Card>
+
+        <Card className="bg-zinc-900 border border-zinc-800">
+          <CardHeader>
+            <h2 className="text-lg font-semibold text-white">Cuentas Compartidas</h2>
+          </CardHeader>
+          <CardBody>
+            {sharedAccounts.length > 0 ? (
+              <div className="space-y-3">
+                {sharedAccounts.map((account) => (
+                  <div
+                    key={account.id}
+                    className="p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50"
+                  >
+                    <p className="text-white font-medium">{account.name}</p>
+                    {account.users && account.users.length > 0 && (
+                      <p className="text-zinc-400 text-sm mt-1">
+                        Compartes con: {account.users
+                          .filter((ua: any) => ua.user.id !== user?.id)
+                          .map((ua: any) => ua.user.name)
+                          .join(", ") || "Nadie"}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-zinc-500 text-center py-4">
+                No tienes cuentas compartidas
+              </p>
+            )}
+          </CardBody>
+        </Card>
+
+        <Card className="bg-zinc-900 border border-zinc-800">
             </form>
           </CardBody>
         </Card>
