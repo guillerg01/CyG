@@ -238,13 +238,82 @@ export default function DashboardPage() {
         />
       </div>
 
+      <Card className="bg-zinc-900 border border-zinc-800">
+        <CardHeader>
+          <h2 className="text-lg font-semibold text-white">
+            Cuenta Compartida Casa
+          </h2>
+        </CardHeader>
+        <CardBody>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 bg-emerald-900/30 rounded-lg border border-emerald-800/50">
+              <p className="text-emerald-300 text-sm mb-1">Total Ingresado</p>
+              <p className="text-white text-2xl font-bold">
+                $
+                {(
+                  (statistics?.totals.houseAccountIncomes?.USD || 0) +
+                  (statistics?.totals.houseAccountIncomes?.USDT || 0) * 1 +
+                  (statistics?.totals.houseAccountIncomes?.CUP || 0) / 450
+                ).toFixed(2)}
+              </p>
+              <p className="text-zinc-400 text-xs mt-1">
+                USD: $
+                {(statistics?.totals.houseAccountIncomes?.USD || 0).toFixed(2)}{" "}
+                | USDT:{" "}
+                {(statistics?.totals.houseAccountIncomes?.USDT || 0).toFixed(2)}{" "}
+                | CUP:{" "}
+                {(statistics?.totals.houseAccountIncomes?.CUP || 0).toFixed(2)}
+              </p>
+            </div>
+            <div className="p-4 bg-rose-900/30 rounded-lg border border-rose-800/50">
+              <p className="text-rose-300 text-sm mb-1">Total Gastado</p>
+              <p className="text-white text-2xl font-bold">
+                $
+                {(
+                  (statistics?.totals.houseAccountExpenses?.USD || 0) +
+                  (statistics?.totals.houseAccountExpenses?.USDT || 0) * 1 +
+                  (statistics?.totals.houseAccountExpenses?.CUP || 0) / 450
+                ).toFixed(2)}
+              </p>
+              <p className="text-zinc-400 text-xs mt-1">
+                USD: $
+                {(statistics?.totals.houseAccountExpenses?.USD || 0).toFixed(2)}{" "}
+                | USDT:{" "}
+                {(statistics?.totals.houseAccountExpenses?.USDT || 0).toFixed(
+                  2
+                )}{" "}
+                | CUP:{" "}
+                {(statistics?.totals.houseAccountExpenses?.CUP || 0).toFixed(2)}
+              </p>
+            </div>
+            <div className="p-4 bg-blue-900/30 rounded-lg border border-blue-800/50">
+              <p className="text-blue-300 text-sm mb-1">Balance Restante</p>
+              <p className="text-white text-2xl font-bold">
+                $
+                {(
+                  (statistics?.totals.houseAccountIncomes?.USD || 0) -
+                  (statistics?.totals.houseAccountExpenses?.USD || 0) +
+                  ((statistics?.totals.houseAccountIncomes?.USDT || 0) -
+                    (statistics?.totals.houseAccountExpenses?.USDT || 0)) *
+                    1 +
+                  ((statistics?.totals.houseAccountIncomes?.CUP || 0) -
+                    (statistics?.totals.houseAccountExpenses?.CUP || 0)) /
+                    450
+                ).toFixed(2)}
+              </p>
+              <p className="text-zinc-400 text-xs mt-1">Ingresos - Gastos</p>
+            </div>
+          </div>
+        </CardBody>
+      </Card>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Gastos de la Casa"
+          title="Gastos Categoría Casa"
           value={`$${(statistics?.totals.houseExpenses?.USD || 0).toFixed(2)}`}
           subtitle={`${(statistics?.totals.houseExpenses?.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.houseExpenses?.CUP || 0).toFixed(2)} CUP`}
           variant="warning"
-          icon={<IconHome className="w-6 h-6 text-amber-400" />}
+          icon={<IconHome className="w-6 h-6 text-orange-400" />}
         />
         <StatCard
           title="Gastos Compartidos"

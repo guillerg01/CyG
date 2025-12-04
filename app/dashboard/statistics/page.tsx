@@ -270,16 +270,40 @@ export default function StatisticsPage() {
                     );
                     const percentage = (total / maxCategoryTotal) * 100;
 
+                    const currencyParts = [];
+                    if (amounts.USD > 0) {
+                      currencyParts.push(
+                        <span key="USD" className="text-emerald-400">${amounts.USD.toFixed(2)}</span>
+                      );
+                    }
+                    if (amounts.USDT > 0) {
+                      currencyParts.push(
+                        <span key="USDT" className="text-blue-400">{amounts.USDT.toFixed(2)} USDT</span>
+                      );
+                    }
+                    if (amounts.CUP > 0) {
+                      currencyParts.push(
+                        <span key="CUP" className="text-amber-400">{amounts.CUP.toFixed(2)} CUP</span>
+                      );
+                    }
+
                     return (
                       <div key={category} className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-white font-medium">{category}</span>
-                          <div className="text-right">
-                            <span className="text-emerald-400">${amounts.USD.toFixed(2)}</span>
-                            <span className="text-zinc-500 mx-1">/</span>
-                            <span className="text-blue-400">{amounts.USDT.toFixed(2)}</span>
-                            <span className="text-zinc-500 mx-1">/</span>
-                            <span className="text-amber-400">{amounts.CUP.toFixed(2)}</span>
+                          <div className="text-right flex gap-2">
+                            {currencyParts.length > 0 ? (
+                              currencyParts.map((part, idx) => (
+                                <span key={idx}>
+                                  {part}
+                                  {idx < currencyParts.length - 1 && (
+                                    <span className="text-zinc-500 mx-1">/</span>
+                                  )}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-zinc-500">$0.00</span>
+                            )}
                           </div>
                         </div>
                         <div className="h-3 bg-zinc-800 rounded-full overflow-hidden flex">

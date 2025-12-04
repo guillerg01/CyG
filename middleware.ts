@@ -45,6 +45,7 @@ export const config = {
     "/api/transactions/:path*",
     "/api/statistics/:path*",
     "/api/categories/:path*",
+    "/api/changes/:path*",
     "/login",
     "/register",
   ],

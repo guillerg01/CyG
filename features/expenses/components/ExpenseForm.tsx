@@ -15,6 +15,7 @@ interface ExpenseFormProps {
   onCancel: () => void;
   initialData?: Partial<ExpenseFormData>;
   loading?: boolean;
+  isEdit?: boolean;
 }
 
 const currencies: { key: Currency; label: string }[] = [
@@ -42,6 +43,7 @@ export function ExpenseForm({
   onCancel,
   initialData,
   loading,
+  isEdit = false,
 }: ExpenseFormProps) {
   const [formData, setFormData] = useState<ExpenseFormData>({
     amount: initialData?.amount || 0,
@@ -199,18 +201,27 @@ export function ExpenseForm({
         />
       )}
 
-      <Input
-        label="Fecha del Gasto (dejar vacio para usar fecha actual)"
-        type="datetime-local"
-        value={formData.createdAt}
-        onChange={(e) =>
-          setFormData({ ...formData, createdAt: e.target.value })
-        }
-        classNames={{
-          input: "bg-zinc-800",
-          inputWrapper: "bg-zinc-800 border-zinc-700",
-        }}
-      />
+      <div className="space-y-2">
+        <label className="text-sm text-zinc-400">
+          Fecha del Gasto
+        </label>
+        <Input
+          type="datetime-local"
+          value={formData.createdAt}
+          onChange={(e) =>
+            setFormData({ ...formData, createdAt: e.target.value })
+          }
+          placeholder="Dejar vacío para fecha actual"
+          classNames={{
+            input: "bg-zinc-800 text-white",
+            inputWrapper: "bg-zinc-800 border-zinc-700 hover:border-zinc-600",
+            base: "w-full",
+          }}
+        />
+        <p className="text-xs text-zinc-500">
+          Si no especificas una fecha, se usará la fecha y hora actual
+        </p>
+      </div>
 
       <div className="flex items-center justify-between p-3 bg-zinc-800 rounded-lg">
         <span className="text-sm text-zinc-300">Gasto Compartido</span>
@@ -237,7 +248,7 @@ export function ExpenseForm({
           className="flex-1 bg-emerald-600 hover:bg-emerald-700"
           isLoading={loading}
         >
-          {initialData ? "Actualizar" : "Agregar"} Gasto
+          {isEdit ? "Actualizar" : "Agregar"} Gasto
         </Button>
       </div>
     </form>

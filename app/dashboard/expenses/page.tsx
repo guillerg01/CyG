@@ -403,6 +403,7 @@ export default function ExpensesPage() {
                 setEditingExpense(null);
               }}
               loading={submitting}
+              isEdit={!!editingExpense}
               initialData={
                 editingExpense
                   ? {

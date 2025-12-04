@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
@@ -56,11 +56,31 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile && pathname === "/dashboard") {
+      router.replace("/dashboard/quick");
+    }
+  }, [isMobile, pathname, router]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
   };
+
+  if (pathname === "/dashboard/quick") {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -118,14 +138,14 @@ export default function DashboardLayout({
             <Dropdown>
               <DropdownTrigger>
                 <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-800 cursor-pointer transition-colors">
-                  <Avatar
-                    size="sm"
-                    className="bg-emerald-500/20"
-                    name="U"
-                  />
+                  <Avatar size="sm" className="bg-emerald-500/20" name="U" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-medium truncate">Usuario</p>
-                    <p className="text-zinc-500 text-xs truncate">Configuracion</p>
+                    <p className="text-white text-sm font-medium truncate">
+                      Usuario
+                    </p>
+                    <p className="text-zinc-500 text-xs truncate">
+                      Configuracion
+                    </p>
                   </div>
                 </div>
               </DropdownTrigger>
@@ -165,4 +185,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-

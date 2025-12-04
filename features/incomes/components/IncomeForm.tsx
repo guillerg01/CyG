@@ -117,18 +117,27 @@ export function IncomeForm({
         </Select>
       </div>
 
-      <Input
-        label="Fecha del Ingreso (dejar vacio para usar fecha actual)"
-        type="datetime-local"
-        value={formData.createdAt}
-        onChange={(e) =>
-          setFormData({ ...formData, createdAt: e.target.value })
-        }
-        classNames={{
-          input: "bg-zinc-800",
-          inputWrapper: "bg-zinc-800 border-zinc-700",
-        }}
-      />
+      <div className="space-y-2">
+        <label className="text-sm text-zinc-400">
+          Fecha del Ingreso
+        </label>
+        <Input
+          type="datetime-local"
+          value={formData.createdAt}
+          onChange={(e) =>
+            setFormData({ ...formData, createdAt: e.target.value })
+          }
+          placeholder="Dejar vacío para fecha actual"
+          classNames={{
+            input: "bg-zinc-800 text-white",
+            inputWrapper: "bg-zinc-800 border-zinc-700 hover:border-zinc-600",
+            base: "w-full",
+          }}
+        />
+        <p className="text-xs text-zinc-500">
+          Si no especificas una fecha, se usará la fecha y hora actual
+        </p>
+      </div>
 
       {showConversionOptions && (
         <div className="space-y-3 p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">

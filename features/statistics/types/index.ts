@@ -8,6 +8,8 @@ export interface Statistics {
     sharedExpenses: { USD: number; USDT: number; CUP: number };
     personalExpenses: { USD: number; USDT: number; CUP: number };
     houseExpenses: { USD: number; USDT: number; CUP: number };
+    houseAccountIncomes: { USD: number; USDT: number; CUP: number };
+    houseAccountExpenses: { USD: number; USDT: number; CUP: number };
   };
   byPaymentMethod: {
     cash: number;

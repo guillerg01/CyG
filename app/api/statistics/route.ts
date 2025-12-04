@@ -46,6 +46,9 @@ export async function GET(request: NextRequest) {
       userId: userFilter,
       ...(Object.keys(dateFilter).length > 0 && { createdAt: dateFilter }),
     },
+    include: {
+      account: true,
+    },
   });
 
   const totalExpensesUSD = expenses
@@ -178,6 +181,26 @@ export async function GET(request: NextRequest) {
     .filter((e) => e.category.name === "Casa" && (e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA"))
     .reduce((sum, e) => sum + e.amount, 0);
 
+  const houseAccountIncomesUSD = incomes
+    .filter((i) => i.account.isShared && i.account.name.includes("Casa") && (i.currency === "USD_ZELLE" || i.currency === "USD_EFECTIVO"))
+    .reduce((sum, i) => sum + i.amount, 0);
+  const houseAccountIncomesUSDT = incomes
+    .filter((i) => i.account.isShared && i.account.name.includes("Casa") && i.currency === "USDT")
+    .reduce((sum, i) => sum + i.amount, 0);
+  const houseAccountIncomesCUP = incomes
+    .filter((i) => i.account.isShared && i.account.name.includes("Casa") && (i.currency === "CUP_EFECTIVO" || i.currency === "CUP_TRANSFERENCIA"))
+    .reduce((sum, i) => sum + i.amount, 0);
+
+  const houseAccountExpensesUSD = expenses
+    .filter((e) => e.account.isShared && e.account.name.includes("Casa") && (e.currency === "USD_ZELLE" || e.currency === "USD_EFECTIVO"))
+    .reduce((sum, e) => sum + e.amount, 0);
+  const houseAccountExpensesUSDT = expenses
+    .filter((e) => e.account.isShared && e.account.name.includes("Casa") && e.currency === "USDT")
+    .reduce((sum, e) => sum + e.amount, 0);
+  const houseAccountExpensesCUP = expenses
+    .filter((e) => e.account.isShared && e.account.name.includes("Casa") && (e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA"))
+    .reduce((sum, e) => sum + e.amount, 0);
+
   return NextResponse.json({
     totals: {
       expenses: { USD: totalExpensesUSD, USDT: totalExpensesUSDT, CUP: totalExpensesCUP },
@@ -207,6 +230,16 @@ export async function GET(request: NextRequest) {
         USD: houseExpensesUSD,
         USDT: houseExpensesUSDT,
         CUP: houseExpensesCUP,
+      },
+      houseAccountIncomes: {
+        USD: houseAccountIncomesUSD,
+        USDT: houseAccountIncomesUSDT,
+        CUP: houseAccountIncomesCUP,
+      },
+      houseAccountExpenses: {
+        USD: houseAccountExpensesUSD,
+        USDT: houseAccountExpensesUSDT,
+        CUP: houseAccountExpensesCUP,
       },
     },
     byPaymentMethod: {
