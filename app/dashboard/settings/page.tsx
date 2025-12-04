@@ -144,7 +144,9 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Configuracion</h1>
-        <p className="text-zinc-400 text-sm">Administra tu perfil y preferencias</p>
+        <p className="text-zinc-400 text-sm">
+          Administra tu perfil y preferencias
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -177,6 +179,17 @@ export default function SettingsPage() {
               />
 
               <Input
+                label="ID de Usuario"
+                value={user?.id || ""}
+                isReadOnly
+                description="Identificador único del usuario en el sistema"
+                classNames={{
+                  input: "bg-zinc-800 text-zinc-400 font-mono text-xs",
+                  inputWrapper: "bg-zinc-800 border-zinc-700",
+                }}
+              />
+
+              <Input
                 label="Porcentaje de Contribucion (%)"
                 type="number"
                 min={0}
@@ -196,7 +209,9 @@ export default function SettingsPage() {
               />
 
               <div className="space-y-2">
-                <p className="text-sm text-zinc-400">Ingresos Mensuales Configurados</p>
+                <p className="text-sm text-zinc-400">
+                  Ingresos Mensuales Configurados
+                </p>
                 <Input
                   label="Ingreso Mensual USD"
                   type="number"
@@ -264,7 +279,9 @@ export default function SettingsPage() {
 
         <Card className="bg-zinc-900 border border-zinc-800">
           <CardHeader>
-            <h2 className="text-lg font-semibold text-white">Cuentas Compartidas</h2>
+            <h2 className="text-lg font-semibold text-white">
+              Cuentas Compartidas
+            </h2>
           </CardHeader>
           <CardBody>
             {sharedAccounts.length > 0 ? (
@@ -277,7 +294,8 @@ export default function SettingsPage() {
                     <p className="text-white font-medium">{account.name}</p>
                     {account.users && account.users.length > 0 && (
                       <p className="text-zinc-400 text-sm mt-1">
-                        Compartes con: {account.users
+                        Compartes con:{" "}
+                        {account.users
                           .filter((ua: any) => ua.user.id !== user?.id)
                           .map((ua: any) => ua.user.name)
                           .join(", ") || "Nadie"}
@@ -296,7 +314,9 @@ export default function SettingsPage() {
 
         <Card className="bg-zinc-900 border border-zinc-800">
           <CardHeader>
-            <h2 className="text-lg font-semibold text-white">Seguridad - PIN</h2>
+            <h2 className="text-lg font-semibold text-white">
+              Seguridad - PIN
+            </h2>
           </CardHeader>
           <CardBody>
             <form onSubmit={handlePinUpdate} className="space-y-4">
@@ -306,7 +326,10 @@ export default function SettingsPage() {
                 maxLength={4}
                 value={pinData.pin}
                 onChange={(e) =>
-                  setPinData({ ...pinData, pin: e.target.value.replace(/\D/g, "") })
+                  setPinData({
+                    ...pinData,
+                    pin: e.target.value.replace(/\D/g, ""),
+                  })
                 }
                 classNames={{
                   input: "bg-zinc-800",
@@ -326,7 +349,8 @@ export default function SettingsPage() {
                   })
                 }
                 isInvalid={
-                  pinData.confirmPin.length > 0 && pinData.pin !== pinData.confirmPin
+                  pinData.confirmPin.length > 0 &&
+                  pinData.pin !== pinData.confirmPin
                 }
                 errorMessage="Los PINs no coinciden"
                 classNames={{
@@ -414,7 +438,9 @@ export default function SettingsPage() {
               />
 
               <div>
-                <label className="block text-sm text-zinc-400 mb-2">Color</label>
+                <label className="block text-sm text-zinc-400 mb-2">
+                  Color
+                </label>
                 <div className="flex gap-2 flex-wrap">
                   {[
                     "#10b981",
@@ -461,4 +487,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
