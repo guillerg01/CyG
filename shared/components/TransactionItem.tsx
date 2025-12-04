@@ -15,7 +15,7 @@ interface TransactionItemProps {
   onClick?: () => void;
 }
 
-const typeConfig = {
+const typeConfig: Record<TransactionType, { label: string; color: string; sign: string }> = {
   EXPENSE: { label: "Gasto", color: "text-rose-400", sign: "-" },
   INCOME: { label: "Ingreso", color: "text-emerald-400", sign: "+" },
   LOAN: { label: "Prestamo", color: "text-blue-400", sign: "-" },
@@ -23,6 +23,7 @@ const typeConfig = {
   CONVERSION: { label: "Conversion", color: "text-purple-400", sign: "" },
   LOAN_PAYMENT: { label: "Pago Prestamo", color: "text-blue-400", sign: "+" },
   DEBT_PAYMENT: { label: "Pago Deuda", color: "text-amber-400", sign: "-" },
+  TRANSFER: { label: "Transferencia", color: "text-indigo-400", sign: "" },
 };
 
 export function TransactionItem({

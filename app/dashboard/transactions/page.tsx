@@ -26,6 +26,7 @@ const typeLabels: Record<TransactionType, string> = {
   CONVERSION: "Conversion",
   LOAN_PAYMENT: "Pago Prestamo",
   DEBT_PAYMENT: "Pago Deuda",
+  TRANSFER: "Transferencia",
 };
 
 const typeColors: Record<TransactionType, string> = {
@@ -36,6 +37,7 @@ const typeColors: Record<TransactionType, string> = {
   CONVERSION: "bg-purple-500/20 text-purple-400",
   LOAN_PAYMENT: "bg-blue-500/20 text-blue-400",
   DEBT_PAYMENT: "bg-amber-500/20 text-amber-400",
+  TRANSFER: "bg-indigo-500/20 text-indigo-400",
 };
 
 export default function TransactionsPage() {
