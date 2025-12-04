@@ -1,0 +1,151 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Select, SelectItem } from "@heroui/select";
+import { Account, Currency } from "@/types";
+
+interface IncomeFormProps {
+  accounts: Account[];
+  onSubmit: (data: IncomeFormData) => Promise<void>;
+  onCancel: () => void;
+  initialData?: Partial<IncomeFormData>;
+  loading?: boolean;
+}
+
+export interface IncomeFormData {
+  amount: number;
+  description: string;
+  currency: Currency;
+  accountId: string;
+  createdAt?: string;
+}
+
+const currencies: { key: Currency; label: string }[] = [
+  { key: "USD", label: "USD ($)" },
+  { key: "USDT", label: "USDT" },
+];
+
+export function IncomeForm({
+  accounts,
+  onSubmit,
+  onCancel,
+  initialData,
+  loading,
+}: IncomeFormProps) {
+  const [formData, setFormData] = useState<IncomeFormData>({
+    amount: initialData?.amount || 0,
+    description: initialData?.description || "",
+    currency: initialData?.currency || "USD",
+    accountId: initialData?.accountId || "",
+    createdAt: initialData?.createdAt || "",
+  });
+
+  useEffect(() => {
+    if (accounts.length > 0 && !formData.accountId) {
+      setFormData((prev) => ({ ...prev, accountId: accounts[0].id }));
+    }
+  }, [accounts, formData.accountId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onSubmit(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <Input
+        label="Monto"
+        type="number"
+        step="0.01"
+        value={formData.amount.toString()}
+        onChange={(e) =>
+          setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
+        }
+        isRequired
+        classNames={{
+          input: "bg-zinc-800",
+          inputWrapper: "bg-zinc-800 border-zinc-700",
+        }}
+      />
+
+      <Input
+        label="Descripcion"
+        value={formData.description}
+        onChange={(e) =>
+          setFormData({ ...formData, description: e.target.value })
+        }
+        classNames={{
+          input: "bg-zinc-800",
+          inputWrapper: "bg-zinc-800 border-zinc-700",
+        }}
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <Select
+          label="Moneda"
+          selectedKeys={[formData.currency]}
+          onChange={(e) =>
+            setFormData({ ...formData, currency: e.target.value as Currency })
+          }
+          classNames={{
+            trigger: "bg-zinc-800 border-zinc-700",
+          }}
+        >
+          {currencies.map((c) => (
+            <SelectItem key={c.key}>{c.label}</SelectItem>
+          ))}
+        </Select>
+
+        <Select
+          label="Cuenta"
+          selectedKeys={formData.accountId ? [formData.accountId] : []}
+          onChange={(e) =>
+            setFormData({ ...formData, accountId: e.target.value })
+          }
+          classNames={{
+            trigger: "bg-zinc-800 border-zinc-700",
+          }}
+        >
+          {accounts.map((a) => (
+            <SelectItem key={a.id}>{a.name}</SelectItem>
+          ))}
+        </Select>
+      </div>
+
+      <Input
+        label="Fecha del Ingreso (dejar vacio para usar fecha actual)"
+        type="datetime-local"
+        value={formData.createdAt}
+        onChange={(e) =>
+          setFormData({ ...formData, createdAt: e.target.value })
+        }
+        classNames={{
+          input: "bg-zinc-800",
+          inputWrapper: "bg-zinc-800 border-zinc-700",
+        }}
+      />
+
+      <div className="flex gap-3 pt-4">
+        <Button
+          type="button"
+          variant="flat"
+          className="flex-1"
+          onPress={onCancel}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          color="primary"
+          className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+          isLoading={loading}
+        >
+          {initialData ? "Actualizar" : "Agregar"} Ingreso
+        </Button>
+      </div>
+    </form>
+  );
+}
+

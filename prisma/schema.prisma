@@ -1,0 +1,243 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Currency {
+    USD
+    USDT
+}
+
+enum PaymentMethod {
+    CASH
+    TRANSFER
+}
+
+enum TransactionType {
+    EXPENSE
+    INCOME
+    LOAN
+    DEBT
+    CONVERSION
+    LOAN_PAYMENT
+    DEBT_PAYMENT
+}
+
+enum ExpenseType {
+    PLANNED
+    REALIZED
+}
+
+model User {
+    id               String   @id @default(cuid())
+    email            String   @unique
+    name             String
+    password         String
+    pin              String?
+    avatar           String?
+    incomePercentage Float    @default(50)
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+
+    accounts        UserAccount[]
+    expenses        Expense[]
+    incomes         Income[]
+    loansGiven      Loan[]        @relation("LoanGiver")
+    loansReceived   Loan[]        @relation("LoanReceiver")
+    debts           Debt[]
+    conversions     Conversion[]
+    transactions    Transaction[]
+    changesAuthored Change[]
+}
+
+model Account {
+    id          String   @id @default(cuid())
+    name        String
+    balanceUSD  Float    @default(0)
+    balanceUSDT Float    @default(0)
+    isShared    Boolean  @default(false)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    users        UserAccount[]
+    expenses     Expense[]
+    incomes      Income[]
+    loansFrom    Loan[]        @relation("LoanFromAccount")
+    loansTo      Loan[]        @relation("LoanToAccount")
+    debts        Debt[]
+    conversions  Conversion[]
+    transactions Transaction[]
+}
+
+model UserAccount {
+    id        String   @id @default(cuid())
+    userId    String
+    accountId String
+    role      String   @default("owner")
+    createdAt DateTime @default(now())
+
+    user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, accountId])
+}
+
+model Category {
+    id        String   @id @default(cuid())
+    name      String   @unique
+    icon      String?
+    color     String?
+    createdAt DateTime @default(now())
+
+    expenses Expense[]
+}
+
+model Expense {
+    id            String        @id @default(cuid())
+    amount        Float
+    description   String?
+    currency      Currency
+    paymentMethod PaymentMethod
+    expenseType   ExpenseType   @default(REALIZED)
+    isShared      Boolean       @default(false)
+    plannedDate   DateTime?
+    createdAt     DateTime      @default(now())
+    updatedAt     DateTime      @updatedAt
+
+    userId     String
+    accountId  String
+    categoryId String
+
+    user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    account  Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+    category Category @relation(fields: [categoryId], references: [id])
+    changes  Change[]
+}
+
+model Income {
+    id          String   @id @default(cuid())
+    amount      Float
+    description String?
+    currency    Currency
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    userId    String
+    accountId String
+
+    user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    account Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+    changes Change[]
+}
+
+model Loan {
+    id          String    @id @default(cuid())
+    amount      Float
+    description String?
+    currency    Currency
+    dueDate     DateTime?
+    isPaid      Boolean   @default(false)
+    paidAmount  Float     @default(0)
+    paidDate    DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    giverId       String
+    receiverId    String
+    fromAccountId String
+    toAccountId   String
+
+    giver       User     @relation("LoanGiver", fields: [giverId], references: [id], onDelete: Cascade)
+    receiver    User     @relation("LoanReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+    fromAccount Account  @relation("LoanFromAccount", fields: [fromAccountId], references: [id], onDelete: Cascade)
+    toAccount   Account  @relation("LoanToAccount", fields: [toAccountId], references: [id], onDelete: Cascade)
+    changes     Change[]
+}
+
+model Debt {
+    id          String    @id @default(cuid())
+    amount      Float
+    description String?
+    currency    Currency
+    dueDate     DateTime?
+    isPaid      Boolean   @default(false)
+    paidAmount  Float     @default(0)
+    paidDate    DateTime?
+    creditor    String
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    userId    String
+    accountId String
+
+    user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    account Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+    changes Change[]
+}
+
+model Conversion {
+    id           String   @id @default(cuid())
+    fromAmount   Float
+    toAmount     Float
+    fromCurrency Currency
+    toCurrency   Currency
+    exchangeRate Float
+    createdAt    DateTime @default(now())
+
+    userId    String
+    accountId String
+
+    user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model Transaction {
+    id          String          @id @default(cuid())
+    type        TransactionType
+    amount      Float
+    currency    Currency
+    description String?
+    referenceId String?
+    createdAt   DateTime        @default(now())
+
+    userId    String
+    accountId String
+
+    user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model Change {
+    id         String   @id @default(cuid())
+    action     String
+    entityType String
+    entityId   String
+    oldValue   String?
+    newValue   String?
+    createdAt  DateTime @default(now())
+
+    authorId String
+    author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+    expenseId String?
+    incomeId  String?
+    loanId    String?
+    debtId    String?
+
+    expense Expense? @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+    income  Income?  @relation(fields: [incomeId], references: [id], onDelete: SetNull)
+    loan    Loan?    @relation(fields: [loanId], references: [id], onDelete: SetNull)
+    debt    Debt?    @relation(fields: [debtId], references: [id], onDelete: SetNull)
+}
+
+model PlannedExpenseAlert {
+    id        String   @id @default(cuid())
+    expenseId String
+    alertDate DateTime
+    isSent    Boolean  @default(false)
+    createdAt DateTime @default(now())
+}
