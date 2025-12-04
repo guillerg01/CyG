@@ -18,12 +18,15 @@ import {
   IconTrendingUp,
   IconHome,
   IconUser,
+  IconBolt,
 } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 import { formatCurrency, getMonthRange } from "@/shared/utils";
 
 type ModalType = "expense" | "income" | "conversion" | "transfer" | null;
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [recentExpenses, setRecentExpenses] = useState<Expense[]>([]);
@@ -169,10 +172,12 @@ export default function DashboardPage() {
     (a) => a.name.includes("USDT") && !a.isShared
   );
   const totalBalanceUSDT = usdtAccount ? usdtAccount.balanceUSDT : 0;
-  const totalBalanceCUP = accounts.reduce(
-    (sum, a) => sum + a.balanceCUPEfectivo + a.balanceCUPTransferencia,
-    0
+  const sharedHouseAccount = accounts.find(
+    (a) => a.isShared && a.name.includes("Casa")
   );
+  const totalBalanceCUP = sharedHouseAccount
+    ? sharedHouseAccount.balanceCUPEfectivo + sharedHouseAccount.balanceCUPTransferencia
+    : 0;
 
   if (loading) {
     return (
@@ -217,6 +222,14 @@ export default function DashboardPage() {
             onPress={() => setModalOpen("transfer")}
           >
             Transferir
+          </Button>
+          <Button
+            variant="flat"
+            className="hidden lg:flex border border-amber-500/50 text-amber-400"
+            onPress={() => router.push("/dashboard/quick")}
+            startContent={<IconBolt className="w-4 h-4" />}
+          >
+            Acceso Rápido
           </Button>
         </div>
       </div>

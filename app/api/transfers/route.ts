@@ -12,12 +12,27 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const accountId = searchParams.get("accountId");
 
-  const where: Record<string, unknown> = { userId: session.id };
+  const userAccounts = await prisma.userAccount.findMany({
+    where: { userId: session.id },
+    select: { accountId: true },
+  });
+
+  const userAccountIds = userAccounts.map((ua) => ua.accountId);
+
+  const where: Record<string, unknown> = {
+    OR: [
+      { userId: session.id },
+      {
+        OR: [
+          { fromAccountId: { in: userAccountIds } },
+          { toAccountId: { in: userAccountIds } },
+        ],
+      },
+    ],
+  };
+
   if (accountId) {
-    where.OR = [
-      { fromAccountId: accountId },
-      { toAccountId: accountId },
-    ];
+    where.OR = [{ fromAccountId: accountId }, { toAccountId: accountId }];
   }
 
   const transfers = await prisma.transfer.findMany({
@@ -25,6 +40,13 @@ export async function GET(request: NextRequest) {
     include: {
       fromAccount: true,
       toAccount: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -42,11 +64,17 @@ export async function POST(request: NextRequest) {
   const { amount, description, currency, fromAccountId, toAccountId } = body;
 
   if (!amount || !currency || !fromAccountId || !toAccountId) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 }
+    );
   }
 
   if (fromAccountId === toAccountId) {
-    return NextResponse.json({ error: "Cannot transfer to the same account" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Cannot transfer to the same account" },
+      { status: 400 }
+    );
   }
 
   const fromAccount = await prisma.account.findUnique({
@@ -105,7 +133,8 @@ export async function POST(request: NextRequest) {
       type: "TRANSFER",
       amount,
       currency,
-      description: description || `Transfer from ${fromAccount.name} to ${toAccount.name}`,
+      description:
+        description || `Transfer from ${fromAccount.name} to ${toAccount.name}`,
       referenceId: transfer.id,
       userId: session.id,
       accountId: fromAccountId,
@@ -117,7 +146,8 @@ export async function POST(request: NextRequest) {
       type: "TRANSFER",
       amount,
       currency,
-      description: description || `Transfer from ${fromAccount.name} to ${toAccount.name}`,
+      description:
+        description || `Transfer from ${fromAccount.name} to ${toAccount.name}`,
       referenceId: transfer.id,
       userId: session.id,
       accountId: toAccountId,
@@ -126,4 +156,3 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json(transfer);
 }
-

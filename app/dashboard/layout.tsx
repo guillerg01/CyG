@@ -24,6 +24,8 @@ import {
   IconCurrencyDollar,
   IconSettings,
   IconLogout,
+  IconBuilding,
+  IconExchange,
 } from "@tabler/icons-react";
 
 const navigation = [
@@ -31,6 +33,9 @@ const navigation = [
   { name: "Gastos", href: "/dashboard/expenses", icon: "expense" },
   { name: "Ingresos", href: "/dashboard/incomes", icon: "income" },
   { name: "Cuentas", href: "/dashboard/accounts", icon: "wallet" },
+  { name: "Cuenta Compartida", href: "/dashboard/shared-account", icon: "shared" },
+  { name: "Transferencias", href: "/dashboard/transfers", icon: "transfer" },
+  { name: "Conversiones", href: "/dashboard/conversions", icon: "conversion" },
   { name: "Prestamos", href: "/dashboard/loans", icon: "loan" },
   { name: "Deudas", href: "/dashboard/debts", icon: "debt" },
   { name: "Estadisticas", href: "/dashboard/statistics", icon: "chart" },
@@ -42,6 +47,9 @@ const icons: Record<string, React.ReactNode> = {
   expense: <IconArrowDown className="w-5 h-5" />,
   income: <IconArrowUp className="w-5 h-5" />,
   wallet: <IconWallet className="w-5 h-5" />,
+  shared: <IconBuilding className="w-5 h-5" />,
+  transfer: <IconArrowsExchange className="w-5 h-5" />,
+  conversion: <IconExchange className="w-5 h-5" />,
   loan: <IconArrowsExchange className="w-5 h-5" />,
   debt: <IconCreditCard className="w-5 h-5" />,
   chart: <IconChartBar className="w-5 h-5" />,

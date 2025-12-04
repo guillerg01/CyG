@@ -96,6 +96,12 @@ export default function LoginPage() {
               Iniciar Sesion
             </Button>
 
+            <div className="text-center">
+              <Link href="/reset-password" className="text-emerald-400 hover:text-emerald-300 text-sm">
+                Olvide mi contrasena
+              </Link>
+            </div>
+
             <p className="text-center text-zinc-400 text-sm">
               No tienes cuenta?{" "}
               <Link href="/register" className="text-emerald-400 hover:text-emerald-300">

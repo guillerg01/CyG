@@ -12,7 +12,25 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const accountId = searchParams.get("accountId");
 
-  const where: Record<string, unknown> = { userId: session.id };
+  const userAccounts = await prisma.userAccount.findMany({
+    where: { userId: session.id },
+    select: { accountId: true },
+  });
+
+  const userAccountIds = userAccounts.map((ua) => ua.accountId);
+
+  const where: Record<string, unknown> = {
+    OR: [
+      { userId: session.id },
+      {
+        account: {
+          id: { in: userAccountIds },
+          isShared: true,
+        },
+      },
+    ],
+  };
+
   if (accountId) {
     where.accountId = accountId;
   }
@@ -21,6 +39,13 @@ export async function GET(request: NextRequest) {
     where,
     include: {
       account: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -35,10 +60,26 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { fromAmount, fromCurrency, toCurrency, exchangeRate, fromAccountId, toAccountId } = body;
+  const {
+    fromAmount,
+    fromCurrency,
+    toCurrency,
+    exchangeRate,
+    fromAccountId,
+    toAccountId,
+  } = body;
 
-  if (!fromAmount || !fromCurrency || !toCurrency || !exchangeRate || !fromAccountId) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  if (
+    !fromAmount ||
+    !fromCurrency ||
+    !toCurrency ||
+    !exchangeRate ||
+    !fromAccountId
+  ) {
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 }
+    );
   }
 
   const toAmount = fromAmount * exchangeRate;
@@ -96,7 +137,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (toAccount.isShared && toAccount.name.includes("Casa") && (toCurrency === "CUP_EFECTIVO" || toCurrency === "CUP_TRANSFERENCIA")) {
+    if (
+      toAccount.isShared &&
+      toAccount.name.includes("Casa") &&
+      (toCurrency === "CUP_EFECTIVO" || toCurrency === "CUP_TRANSFERENCIA")
+    ) {
       await prisma.income.create({
         data: {
           amount: toAmount,
@@ -127,7 +172,8 @@ export async function POST(request: NextRequest) {
 
       // Filtrar solo préstamos desde cuentas personales (no compartidas) hacia la cuenta compartida
       const personalLoans = pendingLoans.filter(
-        (loan) => !loan.fromAccount.isShared && loan.toAccountId === targetAccountId
+        (loan) =>
+          !loan.fromAccount.isShared && loan.toAccountId === targetAccountId
       );
 
       let remainingCUP = toAmount;
@@ -187,4 +233,3 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json(conversion);
 }
-
