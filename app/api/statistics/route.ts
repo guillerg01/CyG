@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     },
     select: {
       id: true,
+      name: true,
       isShared: true,
       balanceUSDZelle: true,
       balanceUSDEfectivo: true,
@@ -463,11 +464,24 @@ export async function GET(request: NextRequest) {
     )
     .reduce((sum, c) => sum + c.toAmount, 0);
 
-  const totalBalanceUSD = userAccounts.reduce(
-    (sum, account) =>
-      sum + (account.balanceUSDZelle || 0) + (account.balanceUSDEfectivo || 0),
-    0
+  const sharedBankAccount = userAccounts.find(
+    (account) =>
+      account.isShared &&
+      account.name.toLowerCase().includes("banco") &&
+      account.name.toLowerCase().includes("principal")
   );
+
+  const totalBalanceUSD = sharedBankAccount
+    ? (sharedBankAccount.balanceUSDZelle || 0) +
+      (sharedBankAccount.balanceUSDEfectivo || 0)
+    : userAccounts
+        .filter((account) => account.isShared)
+        .reduce(
+          (sum, account) =>
+            sum + (account.balanceUSDZelle || 0) + (account.balanceUSDEfectivo || 0),
+          0
+        );
+
   const totalBalanceUSDT = userAccounts.reduce(
     (sum, account) => sum + (account.balanceUSDT || 0),
     0
