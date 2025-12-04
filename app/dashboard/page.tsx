@@ -15,6 +15,8 @@ import {
   IconCoins,
   IconTrendingDown,
   IconTrendingUp,
+  IconHome,
+  IconUser,
 } from "@tabler/icons-react";
 import { formatCurrency, getMonthRange } from "@/shared/utils";
 
@@ -138,7 +140,10 @@ export default function DashboardPage() {
     (sum, a) => sum + a.balanceUSDZelle + a.balanceUSDEfectivo,
     0
   );
-  const totalBalanceUSDT = accounts.reduce((sum, a) => sum + a.balanceUSDT, 0);
+  const usdtAccount = accounts.find(
+    (a) => a.name.includes("USDT") && !a.isShared
+  );
+  const totalBalanceUSDT = usdtAccount ? usdtAccount.balanceUSDT : 0;
   const totalBalanceCUP = accounts.reduce(
     (sum, a) => sum + a.balanceCUPEfectivo + a.balanceCUPTransferencia,
     0
@@ -191,10 +196,19 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard
-          title="Balance USD"
+          title="Balance Total USD"
           value={`$${totalBalanceUSD.toFixed(2)}`}
           variant={totalBalanceUSD >= 0 ? "success" : "danger"}
           icon={<IconCurrencyDollar className="w-6 h-6 text-emerald-400" />}
+        />
+        <StatCard
+          title="Disponible USD"
+          value={`$${(statistics?.totals.balance?.USD || 0).toFixed(2)}`}
+          subtitle={`Gastos planeados: $${(statistics?.totals.plannedExpenses?.USD || 0).toFixed(2)}`}
+          variant={
+            (statistics?.totals.balance?.USD || 0) >= 0 ? "success" : "danger"
+          }
+          icon={<IconCurrencyDollar className="w-6 h-6 text-blue-400" />}
         />
         <StatCard
           title="Balance USDT"
@@ -221,6 +235,37 @@ export default function DashboardPage() {
           subtitle={`${(statistics?.totals.incomes.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.incomes.CUP || 0).toFixed(2)} CUP`}
           variant="success"
           icon={<IconTrendingUp className="w-6 h-6 text-emerald-400" />}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Gastos de la Casa"
+          value={`$${(statistics?.totals.houseExpenses?.USD || 0).toFixed(2)}`}
+          subtitle={`${(statistics?.totals.houseExpenses?.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.houseExpenses?.CUP || 0).toFixed(2)} CUP`}
+          variant="warning"
+          icon={<IconHome className="w-6 h-6 text-amber-400" />}
+        />
+        <StatCard
+          title="Gastos Compartidos"
+          value={`$${(statistics?.totals.sharedExpenses?.USD || 0).toFixed(2)}`}
+          subtitle={`${(statistics?.totals.sharedExpenses?.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.sharedExpenses?.CUP || 0).toFixed(2)} CUP`}
+          variant="warning"
+          icon={<IconHome className="w-6 h-6 text-purple-400" />}
+        />
+        <StatCard
+          title="Gastos Personales"
+          value={`$${(statistics?.totals.personalExpenses?.USD || 0).toFixed(2)}`}
+          subtitle={`${(statistics?.totals.personalExpenses?.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.personalExpenses?.CUP || 0).toFixed(2)} CUP`}
+          variant="warning"
+          icon={<IconUser className="w-6 h-6 text-blue-400" />}
+        />
+        <StatCard
+          title="Gastos Planeados"
+          value={`$${(statistics?.totals.plannedExpenses?.USD || 0).toFixed(2)}`}
+          subtitle={`${(statistics?.totals.plannedExpenses?.USDT || 0).toFixed(2)} USDT / ${(statistics?.totals.plannedExpenses?.CUP || 0).toFixed(2)} CUP`}
+          variant="warning"
+          icon={<IconTrendingDown className="w-6 h-6 text-orange-400" />}
         />
       </div>
 

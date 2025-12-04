@@ -334,8 +334,13 @@ export default function DebtsPage() {
                   }
                   classNames={{ trigger: "bg-zinc-800 border-zinc-700" }}
                 >
-                  <SelectItem key="USD">USD</SelectItem>
+                  <SelectItem key="USD_ZELLE">USD Zelle</SelectItem>
+                  <SelectItem key="USD_EFECTIVO">USD Efectivo</SelectItem>
                   <SelectItem key="USDT">USDT</SelectItem>
+                  <SelectItem key="CUP_EFECTIVO">CUP Efectivo</SelectItem>
+                  <SelectItem key="CUP_TRANSFERENCIA">
+                    CUP Transferencia
+                  </SelectItem>
                 </Select>
               </div>
 

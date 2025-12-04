@@ -36,7 +36,14 @@ export function IncomeForm({
     currency: initialData?.currency || "USD_ZELLE",
     accountId: initialData?.accountId || "",
     createdAt: initialData?.createdAt || "",
+    convertToCUP: initialData?.convertToCUP || false,
+    exchangeRate: initialData?.exchangeRate || 450,
   });
+
+  const selectedAccount = accounts.find((a) => a.id === formData.accountId);
+  const isSharedAccount = selectedAccount?.isShared || false;
+  const isUSDCurrency = formData.currency === "USD_ZELLE" || formData.currency === "USD_EFECTIVO";
+  const showConversionOptions = isSharedAccount && isUSDCurrency;
 
   useEffect(() => {
     if (accounts.length > 0 && !formData.accountId) {
@@ -122,6 +129,44 @@ export function IncomeForm({
           inputWrapper: "bg-zinc-800 border-zinc-700",
         }}
       />
+
+      {showConversionOptions && (
+        <div className="space-y-3 p-4 bg-zinc-800/50 rounded-lg border border-zinc-700">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="convertToCUP"
+              checked={formData.convertToCUP || false}
+              onChange={(e) =>
+                setFormData({ ...formData, convertToCUP: e.target.checked })
+              }
+              className="w-4 h-4 rounded bg-zinc-700 border-zinc-600 text-emerald-600 focus:ring-emerald-500"
+            />
+            <label htmlFor="convertToCUP" className="text-sm text-zinc-300">
+              Convertir a CUP y devolver préstamos automáticamente
+            </label>
+          </div>
+          {formData.convertToCUP && (
+            <Input
+              label="Tasa de Cambio (USD a CUP)"
+              type="number"
+              step="0.01"
+              value={formData.exchangeRate?.toString() || "450"}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  exchangeRate: parseFloat(e.target.value) || 450,
+                })
+              }
+              description={`${formData.amount} USD × ${formData.exchangeRate || 450} = ${((formData.amount || 0) * (formData.exchangeRate || 450)).toFixed(2)} CUP`}
+              classNames={{
+                input: "bg-zinc-800",
+                inputWrapper: "bg-zinc-800 border-zinc-700",
+              }}
+            />
+          )}
+        </div>
+      )}
 
       <div className="flex gap-3 pt-4">
         <Button

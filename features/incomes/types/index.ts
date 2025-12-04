@@ -13,8 +13,10 @@ export interface Income {
 
 export interface IncomeFormData {
   amount: number;
-  description: string;
+  description?: string;
   currency: Currency;
   accountId: string;
   createdAt?: string;
+  convertToCUP?: boolean;
+  exchangeRate?: number;
 }

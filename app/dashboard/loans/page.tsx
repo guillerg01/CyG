@@ -25,7 +25,7 @@ export default function LoansPage() {
   const [formData, setFormData] = useState({
     amount: 0,
     description: "",
-    currency: "USD" as Currency,
+    currency: "USD_ZELLE" as Currency,
     dueDate: "",
     receiverId: "",
     fromAccountId: "",
@@ -34,7 +34,7 @@ export default function LoansPage() {
 
   const [paymentData, setPaymentData] = useState({
     paymentAmount: 0,
-    paymentCurrency: "USD" as Currency,
+    paymentCurrency: "USD_ZELLE" as Currency,
     exchangeRate: 1,
   });
 
@@ -82,7 +82,7 @@ export default function LoansPage() {
         setFormData({
           amount: 0,
           description: "",
-          currency: "USD_ZELLE",
+          currency: "USD_ZELLE" as Currency,
           dueDate: "",
           receiverId: "",
           fromAccountId: "",
@@ -334,8 +334,11 @@ export default function LoansPage() {
                   }
                   classNames={{ trigger: "bg-zinc-800 border-zinc-700" }}
                 >
-                  <SelectItem key="USD">USD</SelectItem>
+                  <SelectItem key="USD_ZELLE">USD Zelle</SelectItem>
+                  <SelectItem key="USD_EFECTIVO">USD Efectivo</SelectItem>
                   <SelectItem key="USDT">USDT</SelectItem>
+                  <SelectItem key="CUP_EFECTIVO">CUP Efectivo</SelectItem>
+                  <SelectItem key="CUP_TRANSFERENCIA">CUP Transferencia</SelectItem>
                 </Select>
               </div>
 
@@ -462,8 +465,11 @@ export default function LoansPage() {
                   }
                   classNames={{ trigger: "bg-zinc-800 border-zinc-700" }}
                 >
-                  <SelectItem key="USD">USD</SelectItem>
+                  <SelectItem key="USD_ZELLE">USD Zelle</SelectItem>
+                  <SelectItem key="USD_EFECTIVO">USD Efectivo</SelectItem>
                   <SelectItem key="USDT">USDT</SelectItem>
+                  <SelectItem key="CUP_EFECTIVO">CUP Efectivo</SelectItem>
+                  <SelectItem key="CUP_TRANSFERENCIA">CUP Transferencia</SelectItem>
                 </Select>
               </div>
 

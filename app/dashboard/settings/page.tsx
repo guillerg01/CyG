@@ -295,11 +295,6 @@ export default function SettingsPage() {
         </Card>
 
         <Card className="bg-zinc-900 border border-zinc-800">
-            </form>
-          </CardBody>
-        </Card>
-
-        <Card className="bg-zinc-900 border border-zinc-800">
           <CardHeader>
             <h2 className="text-lg font-semibold text-white">Seguridad - PIN</h2>
           </CardHeader>

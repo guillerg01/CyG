@@ -43,7 +43,9 @@ export default function AccountsPage() {
     setSubmitting(true);
 
     try {
-      const url = editingAccount ? `/api/accounts/${editingAccount.id}` : "/api/accounts";
+      const url = editingAccount
+        ? `/api/accounts/${editingAccount.id}`
+        : "/api/accounts";
       const method = editingAccount ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -90,7 +92,10 @@ export default function AccountsPage() {
     (sum, a) => sum + a.balanceUSDZelle + a.balanceUSDEfectivo,
     0
   );
-  const totalUSDT = accounts.reduce((sum, a) => sum + a.balanceUSDT, 0);
+  const usdtAccount = accounts.find(
+    (a) => a.name.includes("USDT") && !a.isShared
+  );
+  const totalUSDT = usdtAccount ? usdtAccount.balanceUSDT : 0;
   const totalCUP = accounts.reduce(
     (sum, a) => sum + a.balanceCUPEfectivo + a.balanceCUPTransferencia,
     0
@@ -109,9 +114,14 @@ export default function AccountsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Cuentas</h1>
-          <p className="text-zinc-400 text-sm">Gestiona tus cuentas bancarias</p>
+          <p className="text-zinc-400 text-sm">
+            Gestiona tus cuentas bancarias
+          </p>
         </div>
-        <Button className="bg-emerald-600 hover:bg-emerald-700" onPress={openModal}>
+        <Button
+          className="bg-emerald-600 hover:bg-emerald-700"
+          onPress={openModal}
+        >
           + Nueva Cuenta
         </Button>
       </div>
@@ -120,19 +130,25 @@ export default function AccountsPage() {
         <Card className="bg-gradient-to-br from-emerald-900/50 to-emerald-950 border border-emerald-700/50">
           <CardBody className="p-5">
             <p className="text-emerald-300 text-sm">Balance Total USD</p>
-            <p className="text-3xl font-bold text-white">${totalUSD.toFixed(2)}</p>
+            <p className="text-3xl font-bold text-white">
+              ${totalUSD.toFixed(2)}
+            </p>
           </CardBody>
         </Card>
         <Card className="bg-gradient-to-br from-blue-900/50 to-blue-950 border border-blue-700/50">
           <CardBody className="p-5">
             <p className="text-blue-300 text-sm">Balance Total USDT</p>
-            <p className="text-3xl font-bold text-white">{totalUSDT.toFixed(2)} USDT</p>
+            <p className="text-3xl font-bold text-white">
+              {totalUSDT.toFixed(2)} USDT
+            </p>
           </CardBody>
         </Card>
         <Card className="bg-gradient-to-br from-amber-900/50 to-amber-950 border border-amber-700/50">
           <CardBody className="p-5">
             <p className="text-amber-300 text-sm">Balance Total CUP</p>
-            <p className="text-3xl font-bold text-white">{totalCUP.toFixed(2)} CUP</p>
+            <p className="text-3xl font-bold text-white">
+              {totalCUP.toFixed(2)} CUP
+            </p>
           </CardBody>
         </Card>
         <Card className="bg-zinc-900 border border-zinc-800">
@@ -148,7 +164,9 @@ export default function AccountsPage() {
           <Card key={account.id} className="bg-zinc-900 border border-zinc-800">
             <CardHeader className="flex justify-between items-start pb-2">
               <div>
-                <h3 className="text-lg font-semibold text-white">{account.name}</h3>
+                <h3 className="text-lg font-semibold text-white">
+                  {account.name}
+                </h3>
                 {account.isShared && (
                   <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded mt-1 inline-block">
                     Cuenta Compartida
@@ -210,7 +228,9 @@ export default function AccountsPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center p-2 bg-zinc-800/50 rounded-lg">
-                  <span className="text-zinc-400 text-xs">CUP Transferencia</span>
+                  <span className="text-zinc-400 text-xs">
+                    CUP Transferencia
+                  </span>
                   <span
                     className={`font-bold text-sm ${account.balanceCUPTransferencia >= 0 ? "text-amber-400" : "text-rose-400"}`}
                   >
@@ -227,7 +247,10 @@ export default function AccountsPage() {
         <Card className="bg-zinc-900 border border-zinc-800">
           <CardBody className="py-12 text-center">
             <p className="text-zinc-500 mb-4">No tienes cuentas registradas</p>
-            <Button className="bg-emerald-600 hover:bg-emerald-700" onPress={openModal}>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onPress={openModal}
+            >
               Crear Primera Cuenta
             </Button>
           </CardBody>
@@ -256,7 +279,9 @@ export default function AccountsPage() {
               <Input
                 label="Nombre de la Cuenta"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 isRequired
                 classNames={{
                   input: "bg-zinc-800",
@@ -302,4 +327,3 @@ export default function AccountsPage() {
     </div>
   );
 }
-

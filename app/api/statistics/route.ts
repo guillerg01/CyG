@@ -29,6 +29,15 @@ export async function GET(request: NextRequest) {
       expenseType: "REALIZED",
       ...(Object.keys(dateFilter).length > 0 && { createdAt: dateFilter }),
     },
+    include: { category: true, account: true },
+  });
+
+  const plannedExpenses = await prisma.expense.findMany({
+    where: {
+      userId: userFilter,
+      expenseType: "PLANNED",
+      ...(Object.keys(dateFilter).length > 0 && { createdAt: dateFilter }),
+    },
     include: { category: true },
   });
 
@@ -46,6 +55,16 @@ export async function GET(request: NextRequest) {
     .filter((e) => e.currency === "USDT")
     .reduce((sum, e) => sum + e.amount, 0);
   const totalExpensesCUP = expenses
+    .filter((e) => e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA")
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  const plannedExpensesUSD = plannedExpenses
+    .filter((e) => e.currency === "USD_ZELLE" || e.currency === "USD_EFECTIVO")
+    .reduce((sum, e) => sum + e.amount, 0);
+  const plannedExpensesUSDT = plannedExpenses
+    .filter((e) => e.currency === "USDT")
+    .reduce((sum, e) => sum + e.amount, 0);
+  const plannedExpensesCUP = plannedExpenses
     .filter((e) => e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA")
     .reduce((sum, e) => sum + e.amount, 0);
   const totalIncomesUSD = incomes
@@ -121,14 +140,73 @@ export async function GET(request: NextRequest) {
     {} as Record<string, { USD: number; USDT: number; CUP: number }>
   );
 
+  const totalBalanceUSD = totalIncomesUSD - totalExpensesUSD;
+  const totalBalanceUSDT = totalIncomesUSDT - totalExpensesUSDT;
+  const totalBalanceCUP = totalIncomesCUP - totalExpensesCUP;
+
+  const availableBalanceUSD = totalBalanceUSD - plannedExpensesUSD;
+  const availableBalanceUSDT = totalBalanceUSDT - plannedExpensesUSDT;
+  const availableBalanceCUP = totalBalanceCUP - plannedExpensesCUP;
+
+  const sharedExpensesUSD = expenses
+    .filter((e) => e.isShared && (e.currency === "USD_ZELLE" || e.currency === "USD_EFECTIVO"))
+    .reduce((sum, e) => sum + e.amount, 0);
+  const sharedExpensesUSDT = expenses
+    .filter((e) => e.isShared && e.currency === "USDT")
+    .reduce((sum, e) => sum + e.amount, 0);
+  const sharedExpensesCUP = expenses
+    .filter((e) => e.isShared && (e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA"))
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  const personalExpensesUSD = expenses
+    .filter((e) => !e.isShared && (e.currency === "USD_ZELLE" || e.currency === "USD_EFECTIVO"))
+    .reduce((sum, e) => sum + e.amount, 0);
+  const personalExpensesUSDT = expenses
+    .filter((e) => !e.isShared && e.currency === "USDT")
+    .reduce((sum, e) => sum + e.amount, 0);
+  const personalExpensesCUP = expenses
+    .filter((e) => !e.isShared && (e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA"))
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  const houseExpensesUSD = expenses
+    .filter((e) => e.category.name === "Casa" && (e.currency === "USD_ZELLE" || e.currency === "USD_EFECTIVO"))
+    .reduce((sum, e) => sum + e.amount, 0);
+  const houseExpensesUSDT = expenses
+    .filter((e) => e.category.name === "Casa" && e.currency === "USDT")
+    .reduce((sum, e) => sum + e.amount, 0);
+  const houseExpensesCUP = expenses
+    .filter((e) => e.category.name === "Casa" && (e.currency === "CUP_EFECTIVO" || e.currency === "CUP_TRANSFERENCIA"))
+    .reduce((sum, e) => sum + e.amount, 0);
+
   return NextResponse.json({
     totals: {
       expenses: { USD: totalExpensesUSD, USDT: totalExpensesUSDT, CUP: totalExpensesCUP },
+      plannedExpenses: { USD: plannedExpensesUSD, USDT: plannedExpensesUSDT, CUP: plannedExpensesCUP },
       incomes: { USD: totalIncomesUSD, USDT: totalIncomesUSDT, CUP: totalIncomesCUP },
       balance: {
-        USD: totalIncomesUSD - totalExpensesUSD,
-        USDT: totalIncomesUSDT - totalExpensesUSDT,
-        CUP: totalIncomesCUP - totalExpensesCUP,
+        USD: totalBalanceUSD,
+        USDT: totalBalanceUSDT,
+        CUP: totalBalanceCUP,
+      },
+      availableBalance: {
+        USD: availableBalanceUSD,
+        USDT: availableBalanceUSDT,
+        CUP: availableBalanceCUP,
+      },
+      sharedExpenses: {
+        USD: sharedExpensesUSD,
+        USDT: sharedExpensesUSDT,
+        CUP: sharedExpensesCUP,
+      },
+      personalExpenses: {
+        USD: personalExpensesUSD,
+        USDT: personalExpensesUSDT,
+        CUP: personalExpensesCUP,
+      },
+      houseExpenses: {
+        USD: houseExpensesUSD,
+        USDT: houseExpensesUSDT,
+        CUP: houseExpensesCUP,
       },
     },
     byPaymentMethod: {
