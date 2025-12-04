@@ -39,9 +39,9 @@ export default function DashboardPage() {
 
   const fetchData = useCallback(async () => {
     try {
+      setLoading(true);
       const params = new URLSearchParams();
 
-      // Si está en modo "mes actual", agregar filtros de fecha
       if (isCurrentMonth) {
         const { start, end } = getMonthRange(new Date());
         params.set("startDate", start.toISOString().split("T")[0]);
@@ -49,7 +49,7 @@ export default function DashboardPage() {
       }
 
       const [accountsRes, categoriesRes, expensesRes, incomesRes, statsRes] =
-        await Promise.all([
+        await Promise.allSettled([
           fetch("/api/accounts"),
           fetch("/api/categories"),
           fetch(
@@ -63,23 +63,23 @@ export default function DashboardPage() {
           ),
         ]);
 
-      if (accountsRes.ok) {
-        setAccounts(await accountsRes.json());
+      if (accountsRes.status === "fulfilled" && accountsRes.value.ok) {
+        setAccounts(await accountsRes.value.json());
       }
-      if (categoriesRes.ok) {
-        setCategories(await categoriesRes.json());
+      if (categoriesRes.status === "fulfilled" && categoriesRes.value.ok) {
+        setCategories(await categoriesRes.value.json());
       }
-      if (expensesRes.ok) {
-        setRecentExpenses(await expensesRes.json());
+      if (expensesRes.status === "fulfilled" && expensesRes.value.ok) {
+        setRecentExpenses(await expensesRes.value.json());
       }
-      if (incomesRes.ok) {
-        setRecentIncomes(await incomesRes.json());
+      if (incomesRes.status === "fulfilled" && incomesRes.value.ok) {
+        setRecentIncomes(await incomesRes.value.json());
       }
-      if (statsRes.ok) {
-        setStatistics(await statsRes.json());
+      if (statsRes.status === "fulfilled" && statsRes.value.ok) {
+        setStatistics(await statsRes.value.json());
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching data:", err);
     } finally {
       setLoading(false);
     }
@@ -87,7 +87,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData, isCurrentMonth]);
+  }, [fetchData]);
 
   const handleExpenseSubmit = async (data: ExpenseFormData) => {
     setSubmitting(true);

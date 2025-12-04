@@ -33,6 +33,12 @@ export async function GET(request: NextRequest) {
     },
     select: {
       id: true,
+      isShared: true,
+      balanceUSDZelle: true,
+      balanceUSDEfectivo: true,
+      balanceUSDT: true,
+      balanceCUPEfectivo: true,
+      balanceCUPTransferencia: true,
     },
   });
 
@@ -457,11 +463,22 @@ export async function GET(request: NextRequest) {
     )
     .reduce((sum, c) => sum + c.toAmount, 0);
 
-  const totalBalanceUSD =
-    totalIncomesUSD - totalExpensesUSD - conversionsFromUSD;
-  const totalBalanceUSDT =
-    totalIncomesUSDT - totalExpensesUSDT - conversionsFromUSDT;
-  const totalBalanceCUP = totalIncomesCUP - totalExpensesCUP + conversionsToCUP;
+  const totalBalanceUSD = userAccounts.reduce(
+    (sum, account) =>
+      sum + (account.balanceUSDZelle || 0) + (account.balanceUSDEfectivo || 0),
+    0
+  );
+  const totalBalanceUSDT = userAccounts.reduce(
+    (sum, account) => sum + (account.balanceUSDT || 0),
+    0
+  );
+  const totalBalanceCUP = userAccounts.reduce(
+    (sum, account) =>
+      sum +
+      (account.balanceCUPEfectivo || 0) +
+      (account.balanceCUPTransferencia || 0),
+    0
+  );
 
   const availableBalanceUSD = totalBalanceUSD - plannedExpensesUSD;
   const availableBalanceUSDT = totalBalanceUSDT - plannedExpensesUSDT;
